@@ -92,7 +92,7 @@ export default async function HomePage() {
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Prioritization</span>
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          rVote uses <strong className="text-foreground">quadratic ranking</strong> to let your community democratically
+          rVote uses <strong className="text-foreground">Quadratic Proposal Ranking</strong> to let your community democratically
           prioritize proposals. The best ideas rise to the top through collective intelligence,
           then advance to final voting.
         </p>
@@ -115,11 +115,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* What is Quadratic Ranking */}
+      {/* What is Quadratic Proposal Ranking */}
       <section className="py-8">
         <div className="text-center mb-12">
           <Badge variant="outline" className="mb-4 border-primary/30">The Core Concept</Badge>
-          <h2 className="text-3xl font-bold mb-4">What is Quadratic Ranking?</h2>
+          <h2 className="text-3xl font-bold mb-4">What is Quadratic Proposal Ranking?</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             A system where expressing <em>strong</em> preference costs progressively more,
             creating a fair and balanced priority list that reflects true community consensus.
@@ -152,12 +152,12 @@ export default async function HomePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-primary" />
-                The Solution: Quadratic Ranking
+                The Solution: Quadratic Proposal Ranking
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-muted-foreground">
               <p>
-                Quadratic ranking balances participation and conviction by making
+                Quadratic Proposal Ranking balances participation and conviction by making
                 additional votes progressively more expensive.
               </p>
               <ul className="list-disc list-inside space-y-1">
@@ -216,7 +216,7 @@ export default async function HomePage() {
                 </div>
                 <div>
                   <Badge className="mb-1 bg-primary/10 text-primary">Stage 1</Badge>
-                  <CardTitle>Quadratic Ranking</CardTitle>
+                  <CardTitle>Quadratic Proposal Ranking</CardTitle>
                 </div>
               </div>
             </CardHeader>
@@ -424,7 +424,7 @@ export default async function HomePage() {
             <Badge className="bg-primary/10 text-primary border-primary/20">Join the rSpace Ecosystem</Badge>
             <h2 className="text-3xl font-bold">Ready to prioritize democratically?</h2>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-              Experience quadratic ranking firsthand. Try the interactive demo or
+              Experience Quadratic Proposal Ranking firsthand. Try the interactive demo or
               create an account to start building your community&apos;s backlog together.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
