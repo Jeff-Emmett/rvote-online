@@ -88,8 +88,8 @@ export default async function HomePage() {
           Part of the rSpace Ecosystem
         </Badge>
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight max-w-4xl mx-auto leading-tight">
-          Democratic Backlog{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Prioritization</span>
+          Democratic<br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Backlog Prioritization</span>
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           rVote uses <strong className="text-foreground">Quadratic Proposal Ranking</strong> to let your community democratically
