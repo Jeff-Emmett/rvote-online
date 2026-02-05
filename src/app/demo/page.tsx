@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import {
   ChevronUp,
@@ -19,7 +17,6 @@ import {
   Coins,
   TrendingUp,
   Clock,
-  Users,
 } from "lucide-react";
 
 interface DemoProposal {
@@ -28,6 +25,7 @@ interface DemoProposal {
   description: string;
   score: number;
   userVote: number;
+  pendingVote: number;
   stage: "ranking" | "voting";
   yesVotes: number;
   noVotes: number;
@@ -40,6 +38,7 @@ const initialProposals: DemoProposal[] = [
     description: "Implement a dark theme option for better nighttime usage",
     score: 87,
     userVote: 0,
+    pendingVote: 0,
     stage: "ranking",
     yesVotes: 0,
     noVotes: 0,
@@ -50,6 +49,7 @@ const initialProposals: DemoProposal[] = [
     description: "Host weekly video calls to discuss proposals and progress",
     score: 42,
     userVote: 0,
+    pendingVote: 0,
     stage: "ranking",
     yesVotes: 0,
     noVotes: 0,
@@ -60,6 +60,7 @@ const initialProposals: DemoProposal[] = [
     description: "Build native iOS and Android apps for on-the-go voting",
     score: 103,
     userVote: 0,
+    pendingVote: 0,
     stage: "voting",
     yesVotes: 12,
     noVotes: 5,
@@ -69,32 +70,60 @@ const initialProposals: DemoProposal[] = [
 export default function DemoPage() {
   const [credits, setCredits] = useState(100);
   const [proposals, setProposals] = useState<DemoProposal[]>(initialProposals);
-  const [voteWeight, setVoteWeight] = useState(1);
-  const [activeProposal, setActiveProposal] = useState<number | null>(null);
 
-  const voteCost = voteWeight * voteWeight;
   const maxWeight = Math.floor(Math.sqrt(credits));
 
-  function castVote(proposalId: number, direction: "up" | "down") {
-    const weight = direction === "up" ? voteWeight : -voteWeight;
-    const cost = voteCost;
-
-    if (cost > credits) return;
-
+  function incrementVote(proposalId: number) {
     setProposals((prev) =>
       prev.map((p) => {
         if (p.id === proposalId) {
-          // Return old vote credits if changing vote
-          const oldCost = p.userVote !== 0 ? p.userVote * p.userVote : 0;
-          const newScore = p.score - p.userVote + weight;
+          const newPending = p.pendingVote + 1;
+          const newCost = newPending * newPending;
+          if (newCost <= credits) {
+            return { ...p, pendingVote: newPending };
+          }
+        }
+        return p;
+      })
+    );
+  }
 
-          // Check if promoted
+  function decrementVote(proposalId: number) {
+    setProposals((prev) =>
+      prev.map((p) => {
+        if (p.id === proposalId) {
+          const newPending = p.pendingVote - 1;
+          const newCost = newPending * newPending;
+          if (newCost <= credits) {
+            return { ...p, pendingVote: newPending };
+          }
+        }
+        return p;
+      })
+    );
+  }
+
+  function cancelPending(proposalId: number) {
+    setProposals((prev) =>
+      prev.map((p) => (p.id === proposalId ? { ...p, pendingVote: 0 } : p))
+    );
+  }
+
+  function castVote(proposalId: number) {
+    setProposals((prev) =>
+      prev.map((p) => {
+        if (p.id === proposalId && p.pendingVote !== 0) {
+          const cost = p.pendingVote * p.pendingVote;
+          const newScore = p.score + p.pendingVote;
           const promoted = newScore >= 100 && p.stage === "ranking";
+
+          setCredits((c) => c - cost);
 
           return {
             ...p,
             score: newScore,
-            userVote: weight,
+            userVote: p.pendingVote,
+            pendingVote: 0,
             stage: promoted ? "voting" : p.stage,
             yesVotes: promoted ? 8 : p.yesVotes,
             noVotes: promoted ? 3 : p.noVotes,
@@ -103,10 +132,23 @@ export default function DemoPage() {
         return p;
       })
     );
+  }
 
-    // Deduct credits (simplified - doesn't return old vote credits in demo)
-    setCredits((prev) => prev - cost);
-    setActiveProposal(null);
+  function removeVote(proposalId: number) {
+    setProposals((prev) =>
+      prev.map((p) => {
+        if (p.id === proposalId && p.userVote !== 0) {
+          const refund = p.userVote * p.userVote;
+          setCredits((c) => c + refund);
+          return {
+            ...p,
+            score: p.score - p.userVote,
+            userVote: 0,
+          };
+        }
+        return p;
+      })
+    );
   }
 
   function castFinalVote(proposalId: number, vote: "yes" | "no" | "abstain") {
@@ -127,8 +169,6 @@ export default function DemoPage() {
   function resetDemo() {
     setCredits(100);
     setProposals(initialProposals);
-    setVoteWeight(1);
-    setActiveProposal(null);
   }
 
   const rankingProposals = proposals.filter((p) => p.stage === "ranking");
@@ -142,8 +182,8 @@ export default function DemoPage() {
         </Badge>
         <h1 className="text-4xl font-bold">Try Quadratic Proposal Ranking</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Experience how rVote works without creating an account. Rank these
-          sample proposals and see the quadratic cost in action.
+          Experience how rVote works without creating an account. Click the arrows
+          to add votes and see the quadratic cost increase in real-time.
         </p>
       </div>
 
@@ -176,8 +216,7 @@ export default function DemoPage() {
             Quadratic Ranking Cost
           </CardTitle>
           <CardDescription>
-            The more votes you put on one proposal, the more each additional
-            vote costs
+            Click the arrows to add votes. Each additional vote costs more!
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -214,130 +253,133 @@ export default function DemoPage() {
           </span>
         </div>
 
-        {rankingProposals.map((proposal) => (
-          <Card key={proposal.id}>
-            <div className="flex">
-              <div className="flex flex-col items-center justify-center px-4 border-r bg-muted/30 min-w-[80px]">
-                <Button
-                  variant={proposal.userVote > 0 ? "default" : "ghost"}
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  onClick={() => {
-                    if (proposal.userVote > 0) {
-                      // Remove vote (simplified)
-                      setProposals((prev) =>
-                        prev.map((p) =>
-                          p.id === proposal.id
-                            ? { ...p, score: p.score - p.userVote, userVote: 0 }
-                            : p
-                        )
-                      );
-                      setCredits((c) => c + proposal.userVote * proposal.userVote);
-                    } else {
-                      setActiveProposal(proposal.id);
-                    }
-                  }}
-                  disabled={credits < 1 && proposal.userVote === 0}
-                >
-                  <ChevronUp className="h-5 w-5" />
-                </Button>
-                <Badge variant="outline" className="font-mono text-lg my-1">
-                  {proposal.score}
-                </Badge>
-                <Button
-                  variant={proposal.userVote < 0 ? "destructive" : "ghost"}
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  onClick={() => {
-                    if (proposal.userVote < 0) {
-                      setProposals((prev) =>
-                        prev.map((p) =>
-                          p.id === proposal.id
-                            ? { ...p, score: p.score - p.userVote, userVote: 0 }
-                            : p
-                        )
-                      );
-                      setCredits((c) => c + proposal.userVote * proposal.userVote);
-                    } else {
-                      setActiveProposal(-proposal.id); // Negative for downvote
-                    }
-                  }}
-                  disabled={credits < 1 && proposal.userVote === 0}
-                >
-                  <ChevronDown className="h-5 w-5" />
-                </Button>
-              </div>
-              <div className="flex-1 p-4">
-                <h3 className="font-semibold">{proposal.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {proposal.description}
-                </p>
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span>Progress to voting</span>
-                    <span>{proposal.score}/100</span>
-                  </div>
-                  <Progress
-                    value={Math.min((proposal.score / 100) * 100, 100)}
-                    className="h-2"
-                  />
-                </div>
-                {proposal.userVote !== 0 && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Your vote: {proposal.userVote > 0 ? "+" : ""}
-                    {proposal.userVote} ({Math.abs(proposal.userVote * proposal.userVote)} credits)
-                  </p>
-                )}
-              </div>
-            </div>
+        {rankingProposals.map((proposal) => {
+          const hasPending = proposal.pendingVote !== 0;
+          const hasVoted = proposal.userVote !== 0;
+          const pendingCost = proposal.pendingVote * proposal.pendingVote;
+          const previewScore = proposal.score + proposal.pendingVote;
 
-            {/* Vote weight selector */}
-            {(activeProposal === proposal.id ||
-              activeProposal === -proposal.id) && (
-              <div className="border-t p-4 bg-muted/30">
-                <div className="flex items-center gap-4">
-                  <Label>Vote weight:</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={maxWeight}
-                    value={voteWeight}
-                    onChange={(e) =>
-                      setVoteWeight(
-                        Math.max(1, Math.min(maxWeight, parseInt(e.target.value) || 1))
-                      )
-                    }
-                    className="w-20"
-                  />
-                  <span className="text-sm text-muted-foreground">
-                    Cost: {voteCost} credits
-                  </span>
-                  <div className="flex-1" />
+          return (
+            <Card key={proposal.id}>
+              <div className="flex">
+                <div className="flex flex-col items-center justify-center px-4 border-r bg-muted/30 min-w-[100px]">
+                  {/* Up arrow */}
                   <Button
-                    variant="outline"
+                    variant={proposal.userVote > 0 ? "default" : proposal.pendingVote > 0 ? "outline" : "ghost"}
                     size="sm"
-                    onClick={() => setActiveProposal(null)}
+                    className={`h-8 w-8 p-0 ${proposal.pendingVote > 0 ? "border-primary bg-primary/10" : ""}`}
+                    onClick={() => {
+                      if (proposal.userVote > 0) {
+                        removeVote(proposal.id);
+                      } else if (!hasPending || proposal.pendingVote > 0) {
+                        incrementVote(proposal.id);
+                      }
+                    }}
+                    disabled={hasVoted && proposal.userVote < 0}
                   >
-                    Cancel
+                    <ChevronUp className="h-5 w-5" />
                   </Button>
+
+                  {/* Score display */}
+                  <Badge
+                    variant={hasPending ? "default" : "outline"}
+                    className={`font-mono text-lg my-1 min-w-[4rem] justify-center transition-all ${
+                      hasPending
+                        ? proposal.pendingVote > 0
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-destructive text-destructive-foreground"
+                        : ""
+                    }`}
+                  >
+                    {hasPending ? (
+                      <span className="flex items-center gap-1 text-sm">
+                        <span className="opacity-70">{proposal.score}</span>
+                        <span>→</span>
+                        <span>{previewScore}</span>
+                      </span>
+                    ) : (
+                      proposal.score
+                    )}
+                  </Badge>
+
+                  {/* Down arrow */}
                   <Button
+                    variant={proposal.userVote < 0 ? "destructive" : proposal.pendingVote < 0 ? "outline" : "ghost"}
                     size="sm"
-                    variant={activeProposal > 0 ? "default" : "destructive"}
-                    onClick={() =>
-                      castVote(
-                        Math.abs(activeProposal),
-                        activeProposal > 0 ? "up" : "down"
-                      )
-                    }
-                    disabled={voteCost > credits}
+                    className={`h-8 w-8 p-0 ${proposal.pendingVote < 0 ? "border-destructive bg-destructive/10" : ""}`}
+                    onClick={() => {
+                      if (proposal.userVote < 0) {
+                        removeVote(proposal.id);
+                      } else if (!hasPending || proposal.pendingVote < 0) {
+                        decrementVote(proposal.id);
+                      }
+                    }}
+                    disabled={hasVoted && proposal.userVote > 0}
                   >
-                    {activeProposal > 0 ? "Upvote" : "Downvote"} ({voteCost} credits)
+                    <ChevronDown className="h-5 w-5" />
                   </Button>
+
+                  {/* Pending vote info */}
+                  {hasPending && (
+                    <div className="flex flex-col items-center gap-0.5 mt-2">
+                      <span className="text-xs font-medium">
+                        {proposal.pendingVote > 0 ? "+" : ""}{proposal.pendingVote} vote{Math.abs(proposal.pendingVote) !== 1 ? "s" : ""}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {pendingCost} credit{pendingCost !== 1 ? "s" : ""}
+                      </span>
+                      <div className="flex gap-1 mt-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={() => cancelPending(proposal.id)}
+                          title="Cancel"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant={proposal.pendingVote > 0 ? "default" : "destructive"}
+                          size="sm"
+                          className="h-6 px-2 text-xs"
+                          onClick={() => castVote(proposal.id)}
+                          title="Confirm vote"
+                        >
+                          <Check className="h-3 w-3 mr-1" />
+                          Cast
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Existing vote display */}
+                  {hasVoted && !hasPending && (
+                    <span className="text-xs text-muted-foreground mt-2">
+                      Your vote: {proposal.userVote > 0 ? "+" : ""}{proposal.userVote}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex-1 p-4">
+                  <h3 className="font-semibold">{proposal.title}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {proposal.description}
+                  </p>
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span>Progress to voting</span>
+                      <span>{hasPending ? previewScore : proposal.score}/100</span>
+                    </div>
+                    <Progress
+                      value={Math.min(((hasPending ? previewScore : proposal.score) / 100) * 100, 100)}
+                      className="h-2"
+                    />
+                  </div>
                 </div>
               </div>
-            )}
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </section>
 
       {/* Voting stage */}
