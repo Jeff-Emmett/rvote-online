@@ -115,6 +115,46 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ELI5 Section */}
+      <section className="py-8">
+        <Card className="border-2 border-accent/30 bg-gradient-to-r from-accent/5 via-primary/5 to-accent/5">
+          <CardHeader className="text-center pb-2">
+            <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-accent/10 text-accent-foreground border-accent/20">
+              ELI5
+            </Badge>
+            <CardTitle className="text-2xl">rVote in 30 Seconds</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center max-w-3xl mx-auto">
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">rVote</strong> is a{" "}
+              <strong className="text-primary">quadratic Reddit-style ranking system</strong>{" "}
+              with <strong className="text-accent">time-delayed vote decay</strong>{" "}
+              for proposal prioritization.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 text-sm">
+              <div className="p-3 rounded-lg bg-primary/10">
+                <strong className="text-primary">Quadratic</strong>
+                <p className="text-muted-foreground mt-1">
+                  Voting more costs exponentially more credits (1→1, 2→4, 3→9), preventing any single voice from dominating.
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-secondary/10">
+                <strong className="text-secondary">Reddit-style</strong>
+                <p className="text-muted-foreground mt-1">
+                  Upvote or downvote proposals. The best ideas rise to the top through collective ranking.
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-accent/10">
+                <strong className="text-accent-foreground">Vote Decay</strong>
+                <p className="text-muted-foreground mt-1">
+                  Votes fade after 30-60 days, ensuring rankings reflect current community priorities, not ancient history.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
       {/* What is Quadratic Proposal Ranking */}
       <section className="py-8">
         <div className="text-center mb-12">
