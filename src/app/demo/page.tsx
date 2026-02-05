@@ -36,7 +36,7 @@ const initialProposals: DemoProposal[] = [
     id: 1,
     title: "Add dark mode to the dashboard",
     description: "Implement a dark theme option for better nighttime usage",
-    score: 87,
+    score: 45,
     userVote: 0,
     pendingVote: 0,
     stage: "ranking",
@@ -47,7 +47,7 @@ const initialProposals: DemoProposal[] = [
     id: 2,
     title: "Weekly community calls",
     description: "Host weekly video calls to discuss proposals and progress",
-    score: 42,
+    score: 43,
     userVote: 0,
     pendingVote: 0,
     stage: "ranking",
@@ -58,12 +58,12 @@ const initialProposals: DemoProposal[] = [
     id: 3,
     title: "Create a mobile app",
     description: "Build native iOS and Android apps for on-the-go voting",
-    score: 103,
+    score: 44,
     userVote: 0,
     pendingVote: 0,
-    stage: "voting",
-    yesVotes: 12,
-    noVotes: 5,
+    stage: "ranking",
+    yesVotes: 0,
+    noVotes: 0,
   },
 ];
 
@@ -171,7 +171,9 @@ export default function DemoPage() {
     setProposals(initialProposals);
   }
 
-  const rankingProposals = proposals.filter((p) => p.stage === "ranking");
+  const rankingProposals = proposals
+    .filter((p) => p.stage === "ranking")
+    .sort((a, b) => b.score - a.score); // Sort by score descending
   const votingProposals = proposals.filter((p) => p.stage === "voting");
 
   return (
@@ -253,15 +255,20 @@ export default function DemoPage() {
           </span>
         </div>
 
-        {rankingProposals.map((proposal) => {
+        {rankingProposals.map((proposal, index) => {
           const hasPending = proposal.pendingVote !== 0;
           const hasVoted = proposal.userVote !== 0;
           const pendingCost = proposal.pendingVote * proposal.pendingVote;
           const previewScore = proposal.score + proposal.pendingVote;
+          const rank = index + 1;
 
           return (
-            <Card key={proposal.id}>
+            <Card key={proposal.id} className="transition-all duration-300">
               <div className="flex">
+                {/* Rank indicator */}
+                <div className="flex items-center justify-center px-3 bg-muted/50 border-r font-bold text-2xl text-muted-foreground min-w-[50px]">
+                  #{rank}
+                </div>
                 <div className="flex flex-col items-center justify-center px-4 border-r bg-muted/30 min-w-[100px]">
                   {/* Up arrow */}
                   <Button
@@ -382,17 +389,18 @@ export default function DemoPage() {
         })}
       </section>
 
-      {/* Voting stage */}
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline">Stage 2</Badge>
-          <h2 className="text-xl font-semibold">Pass/Fail Voting</h2>
-          <span className="text-muted-foreground text-sm">
-            One member = one vote
-          </span>
-        </div>
+      {/* Voting stage - only show if proposals have been promoted */}
+      {votingProposals.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">Stage 2</Badge>
+            <h2 className="text-xl font-semibold">Pass/Fail Voting</h2>
+            <span className="text-muted-foreground text-sm">
+              One member = one vote
+            </span>
+          </div>
 
-        {votingProposals.map((proposal) => {
+          {votingProposals.map((proposal) => {
           const total = proposal.yesVotes + proposal.noVotes;
           const yesPercent = total > 0 ? (proposal.yesVotes / total) * 100 : 50;
           return (
@@ -460,8 +468,9 @@ export default function DemoPage() {
               </CardContent>
             </Card>
           );
-        })}
-      </section>
+          })}
+        </section>
+      )}
 
       {/* CTA */}
       <Card className="border-primary bg-primary/5">
