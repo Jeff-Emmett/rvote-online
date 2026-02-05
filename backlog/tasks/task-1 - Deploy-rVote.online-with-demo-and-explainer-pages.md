@@ -4,7 +4,7 @@ title: Deploy rVote.online with demo and explainer pages
 status: Done
 assignee: []
 created_date: '2026-02-05 04:58'
-updated_date: '2026-02-05 04:58'
+updated_date: '2026-02-05 11:10'
 labels: []
 dependencies: []
 priority: high
@@ -53,4 +53,13 @@ Create and deploy rVote.online website with quadratic voting system for communit
 ### Pending: Deployment to rvote.online
 - Deploy to Netcup RS 8000
 - Configure Cloudflare tunnel
+
+## Deployment Complete (2026-02-05)
+
+- Site live at https://rvote.online
+- Cloudflare DNS configured and propagated
+- Traefik routing working
+- Database tables created
+- Demo page and landing page functional
+- Auth pages ready for user registration
 <!-- SECTION:NOTES:END -->
