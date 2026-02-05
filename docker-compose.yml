@@ -1,0 +1,47 @@
+services:
+  rvote:
+    build: .
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rvote.rule=Host(`rvote.online`) || Host(`www.rvote.online`)"
+      - "traefik.http.routers.rvote.entrypoints=web,websecure"
+      - "traefik.http.routers.rvote.tls=true"
+      - "traefik.http.services.rvote.loadbalancer.server.port=3000"
+    environment:
+      - DATABASE_URL=postgresql://rvote:${DB_PASSWORD}@postgres:5432/rvote
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=https://rvote.online
+      - RESEND_API_KEY=${RESEND_API_KEY}
+    networks:
+      - traefik-public
+      - rvote-internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=rvote
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=rvote
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rvote-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rvote -d rvote"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  traefik-public:
+    external: true
+  rvote-internal:
+    internal: true
+
+volumes:
+  postgres_data:
