@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import {
   ChevronUp,
@@ -95,30 +94,52 @@ export default function DemoPage() {
 
   const maxWeight = Math.floor(Math.sqrt(credits));
 
-  function incrementVote(proposalId: number) {
+  function handleUpvote(proposalId: number) {
     setProposals((prev) =>
       prev.map((p) => {
-        if (p.id === proposalId) {
-          const newPending = p.pendingVote + 1;
-          const newCost = newPending * newPending;
-          if (newCost <= credits) {
-            return { ...p, pendingVote: newPending };
-          }
+        if (p.id !== proposalId) return p;
+
+        // If already voted up, remove the vote
+        if (p.userVote > 0) {
+          const refund = p.userVote * p.userVote;
+          setCredits((c) => c + refund);
+          return { ...p, score: p.score - p.userVote, userVote: 0, pendingVote: 0 };
+        }
+
+        // If already voted down, can't upvote
+        if (p.userVote < 0) return p;
+
+        // Increment pending vote
+        const newPending = p.pendingVote + 1;
+        const newCost = newPending * newPending;
+        if (newCost <= credits && newPending <= maxWeight) {
+          return { ...p, pendingVote: newPending };
         }
         return p;
       })
     );
   }
 
-  function decrementVote(proposalId: number) {
+  function handleDownvote(proposalId: number) {
     setProposals((prev) =>
       prev.map((p) => {
-        if (p.id === proposalId) {
-          const newPending = p.pendingVote - 1;
-          const newCost = newPending * newPending;
-          if (newCost <= credits) {
-            return { ...p, pendingVote: newPending };
-          }
+        if (p.id !== proposalId) return p;
+
+        // If already voted down, remove the vote
+        if (p.userVote < 0) {
+          const refund = p.userVote * p.userVote;
+          setCredits((c) => c + refund);
+          return { ...p, score: p.score - p.userVote, userVote: 0, pendingVote: 0 };
+        }
+
+        // If already voted up, can't downvote
+        if (p.userVote > 0) return p;
+
+        // Decrement pending vote
+        const newPending = p.pendingVote - 1;
+        const newCost = newPending * newPending;
+        if (newCost <= credits && Math.abs(newPending) <= maxWeight) {
+          return { ...p, pendingVote: newPending };
         }
         return p;
       })
@@ -131,44 +152,26 @@ export default function DemoPage() {
     );
   }
 
-  function castVote(proposalId: number) {
+  function confirmVote(proposalId: number) {
     setProposals((prev) =>
       prev.map((p) => {
-        if (p.id === proposalId && p.pendingVote !== 0) {
-          const cost = p.pendingVote * p.pendingVote;
-          const newScore = p.score + p.pendingVote;
-          const promoted = newScore >= 100 && p.stage === "ranking";
+        if (p.id !== proposalId || p.pendingVote === 0) return p;
 
-          setCredits((c) => c - cost);
+        const cost = p.pendingVote * p.pendingVote;
+        const newScore = p.score + p.pendingVote;
+        const promoted = newScore >= 100 && p.stage === "ranking";
 
-          return {
-            ...p,
-            score: newScore,
-            userVote: p.pendingVote,
-            pendingVote: 0,
-            stage: promoted ? "voting" : p.stage,
-            yesVotes: promoted ? 8 : p.yesVotes,
-            noVotes: promoted ? 3 : p.noVotes,
-          };
-        }
-        return p;
-      })
-    );
-  }
+        setCredits((c) => c - cost);
 
-  function removeVote(proposalId: number) {
-    setProposals((prev) =>
-      prev.map((p) => {
-        if (p.id === proposalId && p.userVote !== 0) {
-          const refund = p.userVote * p.userVote;
-          setCredits((c) => c + refund);
-          return {
-            ...p,
-            score: p.score - p.userVote,
-            userVote: 0,
-          };
-        }
-        return p;
+        return {
+          ...p,
+          score: newScore,
+          userVote: p.pendingVote,
+          pendingVote: 0,
+          stage: promoted ? "voting" : p.stage,
+          yesVotes: promoted ? 8 : p.yesVotes,
+          noVotes: promoted ? 3 : p.noVotes,
+        };
       })
     );
   }
@@ -255,7 +258,7 @@ export default function DemoPage() {
                     : "bg-muted/50 border-muted text-muted-foreground"
                 }`}
               >
-                <div className="font-bold text-xl">{w > 0 ? "+" : ""}{w}</div>
+                <div className="font-bold text-xl">+{w}</div>
                 <div className="text-xs opacity-70">vote{w > 1 ? "s" : ""}</div>
                 <div className="font-mono text-sm mt-1 font-semibold">{w * w}¢</div>
               </div>
@@ -279,163 +282,135 @@ export default function DemoPage() {
             const hasPending = proposal.pendingVote !== 0;
             const hasVoted = proposal.userVote !== 0;
             const pendingCost = proposal.pendingVote * proposal.pendingVote;
-            const previewScore = proposal.score + proposal.pendingVote;
-            const progressPercent = Math.min((proposal.score / 100) * 100, 100);
-            const previewPercent = Math.min((previewScore / 100) * 100, 100);
+            const displayScore = hasPending ? proposal.score + proposal.pendingVote : proposal.score;
+            const progressPercent = Math.min((displayScore / 100) * 100, 100);
+
+            const isUpvoted = (hasVoted && proposal.userVote > 0) || proposal.pendingVote > 0;
+            const isDownvoted = (hasVoted && proposal.userVote < 0) || proposal.pendingVote < 0;
 
             return (
-              <Card
+              <div
                 key={proposal.id}
-                className={`transition-all duration-200 overflow-hidden ${
+                className={`flex rounded-xl border bg-card shadow-sm overflow-hidden transition-all duration-200 ${
                   hasPending
                     ? proposal.pendingVote > 0
-                      ? "ring-2 ring-orange-500/50 bg-orange-500/5"
-                      : "ring-2 ring-blue-500/50 bg-blue-500/5"
-                    : hasVoted
-                      ? proposal.userVote > 0
-                        ? "bg-orange-500/5"
-                        : "bg-blue-500/5"
-                      : ""
+                      ? "ring-2 ring-orange-500/50"
+                      : "ring-2 ring-blue-500/50"
+                    : ""
                 }`}
               >
-                <div className="flex">
-                  {/* Reddit-style vote column */}
-                  <div className="flex flex-col items-center justify-center py-4 px-3 bg-muted/40 min-w-[70px] gap-1">
-                    {/* Upvote button */}
-                    <button
-                      onClick={() => {
-                        if (hasVoted && proposal.userVote > 0) {
-                          removeVote(proposal.id);
-                        } else if (!hasVoted || proposal.pendingVote >= 0) {
-                          incrementVote(proposal.id);
-                        }
-                      }}
-                      disabled={hasVoted && proposal.userVote < 0}
-                      className={`p-1 rounded transition-all hover:scale-110 ${
-                        (hasVoted && proposal.userVote > 0) || proposal.pendingVote > 0
-                          ? "text-orange-500"
-                          : "text-muted-foreground hover:text-orange-500"
-                      } ${hasVoted && proposal.userVote < 0 ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
-                    >
-                      <ChevronUp className="h-8 w-8" strokeWidth={3} />
-                    </button>
+                {/* Reddit-style vote column */}
+                <div className="flex flex-col items-center justify-center py-3 px-4 bg-muted/50 border-r min-w-[72px]">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`h-10 w-10 p-0 rounded-md transition-all ${
+                      isUpvoted
+                        ? "text-orange-500 bg-orange-500/10 hover:bg-orange-500/20"
+                        : "text-muted-foreground hover:text-orange-500 hover:bg-orange-500/10"
+                    } ${hasVoted && proposal.userVote < 0 ? "opacity-30 pointer-events-none" : ""}`}
+                    onClick={() => handleUpvote(proposal.id)}
+                  >
+                    <ChevronUp className="h-7 w-7" strokeWidth={2.5} />
+                  </Button>
 
-                    {/* Score display */}
-                    <div className={`font-bold text-xl tabular-nums min-w-[3ch] text-center ${
-                      hasPending
-                        ? proposal.pendingVote > 0
-                          ? "text-orange-500"
-                          : "text-blue-500"
-                        : hasVoted
-                          ? proposal.userVote > 0
-                            ? "text-orange-500"
-                            : "text-blue-500"
-                          : "text-foreground"
-                    }`}>
-                      {hasPending ? previewScore : proposal.score}
-                    </div>
+                  <span className={`font-bold text-xl tabular-nums py-1 ${
+                    isUpvoted ? "text-orange-500" : isDownvoted ? "text-blue-500" : "text-foreground"
+                  }`}>
+                    {displayScore}
+                  </span>
 
-                    {/* Downvote button */}
-                    <button
-                      onClick={() => {
-                        if (hasVoted && proposal.userVote < 0) {
-                          removeVote(proposal.id);
-                        } else if (!hasVoted || proposal.pendingVote <= 0) {
-                          decrementVote(proposal.id);
-                        }
-                      }}
-                      disabled={hasVoted && proposal.userVote > 0}
-                      className={`p-1 rounded transition-all hover:scale-110 ${
-                        (hasVoted && proposal.userVote < 0) || proposal.pendingVote < 0
-                          ? "text-blue-500"
-                          : "text-muted-foreground hover:text-blue-500"
-                      } ${hasVoted && proposal.userVote > 0 ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
-                    >
-                      <ChevronDown className="h-8 w-8" strokeWidth={3} />
-                    </button>
-                  </div>
-
-                  {/* Proposal content */}
-                  <div className="flex-1 p-4 min-w-0">
-                    <h3 className="font-semibold text-base leading-tight">{proposal.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                      {proposal.description}
-                    </p>
-
-                    {/* Progress bar */}
-                    <div className="mt-3">
-                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                        <span>Progress to voting stage</span>
-                        <span className={hasPending ? (proposal.pendingVote > 0 ? "text-orange-500" : "text-blue-500") : ""}>
-                          {hasPending ? previewScore : proposal.score}/100
-                        </span>
-                      </div>
-                      <div className="h-2 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-300 ${
-                            hasPending
-                              ? proposal.pendingVote > 0
-                                ? "bg-orange-500"
-                                : "bg-blue-500"
-                              : "bg-primary"
-                          }`}
-                          style={{ width: `${hasPending ? previewPercent : progressPercent}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Vote status / pending confirmation */}
-                    {(hasPending || hasVoted) && (
-                      <div className="mt-3 flex items-center gap-3">
-                        {hasPending ? (
-                          <>
-                            <Badge
-                              variant="outline"
-                              className={proposal.pendingVote > 0
-                                ? "border-orange-500/50 text-orange-600 bg-orange-500/10"
-                                : "border-blue-500/50 text-blue-600 bg-blue-500/10"
-                              }
-                            >
-                              {proposal.pendingVote > 0 ? "+" : ""}{proposal.pendingVote} vote = {pendingCost} credits
-                            </Badge>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 px-2 text-muted-foreground hover:text-foreground"
-                              onClick={() => cancelPending(proposal.id)}
-                            >
-                              <X className="h-4 w-4 mr-1" />
-                              Cancel
-                            </Button>
-                            <Button
-                              size="sm"
-                              className={`h-7 ${
-                                proposal.pendingVote > 0
-                                  ? "bg-orange-500 hover:bg-orange-600"
-                                  : "bg-blue-500 hover:bg-blue-600"
-                              }`}
-                              onClick={() => castVote(proposal.id)}
-                            >
-                              <Check className="h-4 w-4 mr-1" />
-                              Confirm
-                            </Button>
-                          </>
-                        ) : hasVoted && (
-                          <Badge
-                            variant="secondary"
-                            className={proposal.userVote > 0
-                              ? "bg-orange-500/20 text-orange-600 border-orange-500/30"
-                              : "bg-blue-500/20 text-blue-600 border-blue-500/30"
-                            }
-                          >
-                            You voted: {proposal.userVote > 0 ? "+" : ""}{proposal.userVote}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`h-10 w-10 p-0 rounded-md transition-all ${
+                      isDownvoted
+                        ? "text-blue-500 bg-blue-500/10 hover:bg-blue-500/20"
+                        : "text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10"
+                    } ${hasVoted && proposal.userVote > 0 ? "opacity-30 pointer-events-none" : ""}`}
+                    onClick={() => handleDownvote(proposal.id)}
+                  >
+                    <ChevronDown className="h-7 w-7" strokeWidth={2.5} />
+                  </Button>
                 </div>
-              </Card>
+
+                {/* Proposal content */}
+                <div className="flex-1 p-4 min-w-0">
+                  <h3 className="font-semibold text-base leading-tight">{proposal.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                    {proposal.description}
+                  </p>
+
+                  {/* Progress bar */}
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                      <span>Progress to voting stage</span>
+                      <span className={isUpvoted ? "text-orange-500 font-medium" : isDownvoted ? "text-blue-500 font-medium" : ""}>
+                        {displayScore}/100
+                      </span>
+                    </div>
+                    <div className="h-2 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          isUpvoted ? "bg-orange-500" : isDownvoted ? "bg-blue-500" : "bg-primary"
+                        }`}
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Pending vote confirmation */}
+                  {hasPending && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={proposal.pendingVote > 0
+                          ? "border-orange-500/50 text-orange-600 bg-orange-500/10"
+                          : "border-blue-500/50 text-blue-600 bg-blue-500/10"
+                        }
+                      >
+                        {proposal.pendingVote > 0 ? "+" : ""}{proposal.pendingVote} vote = {pendingCost} credits
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2"
+                        onClick={() => cancelPending(proposal.id)}
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        className={`h-7 ${
+                          proposal.pendingVote > 0
+                            ? "bg-orange-500 hover:bg-orange-600"
+                            : "bg-blue-500 hover:bg-blue-600"
+                        }`}
+                        onClick={() => confirmVote(proposal.id)}
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Confirm
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Existing vote indicator */}
+                  {hasVoted && !hasPending && (
+                    <div className="mt-3">
+                      <Badge
+                        variant="secondary"
+                        className={proposal.userVote > 0
+                          ? "bg-orange-500/20 text-orange-600"
+                          : "bg-blue-500/20 text-blue-600"
+                        }
+                      >
+                        You voted: {proposal.userVote > 0 ? "+" : ""}{proposal.userVote}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+              </div>
             );
           })}
         </div>
@@ -468,7 +443,6 @@ export default function DemoPage() {
                   <CardDescription>{proposal.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Vote bar */}
                   <div className="space-y-2">
                     <div className="h-4 rounded-full overflow-hidden bg-muted flex">
                       <div
@@ -490,7 +464,6 @@ export default function DemoPage() {
                     </div>
                   </div>
 
-                  {/* Vote buttons */}
                   <div className="grid grid-cols-3 gap-2">
                     <Button
                       variant="outline"
