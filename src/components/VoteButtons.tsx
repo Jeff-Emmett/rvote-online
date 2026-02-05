@@ -110,6 +110,9 @@ export function VoteButtons({
   const votedDown = hasVoted && userVote.weight < 0;
   const hasPending = pendingWeight !== 0;
 
+  const isUpvoted = votedUp || pendingWeight > 0;
+  const isDownvoted = votedDown || pendingWeight < 0;
+
   // Preview score with pending vote
   const previewScore = hasPending ? currentScore + pendingWeight : currentScore;
 
@@ -117,9 +120,13 @@ export function VoteButtons({
     <div className="flex flex-col items-center gap-1">
       {/* Up arrow */}
       <Button
-        variant={votedUp ? "default" : pendingWeight > 0 ? "outline" : "ghost"}
+        variant="ghost"
         size="sm"
-        className={`h-8 w-8 p-0 ${pendingWeight > 0 ? "border-primary bg-primary/10" : ""}`}
+        className={`h-10 w-10 p-0 rounded-md transition-all ${
+          isUpvoted
+            ? "text-orange-500 bg-orange-500/10 hover:bg-orange-500/20"
+            : "text-muted-foreground hover:text-orange-500 hover:bg-orange-500/10"
+        } ${(hasVoted && !votedUp) ? "opacity-30 pointer-events-none" : ""}`}
         onClick={() => {
           if (votedUp) {
             removeVote();
@@ -130,40 +137,29 @@ export function VoteButtons({
         disabled={disabled || isVoting || (hasVoted && !votedUp)}
         title={votedUp ? "Remove upvote" : "Add upvote"}
       >
-        {isVoting ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+        {isVoting && votedUp ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
-          <ChevronUp className="h-5 w-5" />
+          <ChevronUp className="h-7 w-7" strokeWidth={2.5} />
         )}
       </Button>
 
       {/* Score display */}
-      <Badge
-        variant={hasPending ? "default" : "outline"}
-        className={`font-mono text-lg px-2 min-w-[3rem] justify-center transition-all ${
-          hasPending
-            ? pendingWeight > 0
-              ? "bg-primary text-primary-foreground"
-              : "bg-destructive text-destructive-foreground"
-            : ""
-        }`}
-      >
-        {hasPending ? (
-          <span className="flex items-center gap-1">
-            <span className="text-xs opacity-70">{currentScore}</span>
-            <span>→</span>
-            <span>{previewScore}</span>
-          </span>
-        ) : (
-          currentScore
-        )}
-      </Badge>
+      <span className={`font-bold text-xl tabular-nums py-1 min-w-[3ch] text-center ${
+        isUpvoted ? "text-orange-500" : isDownvoted ? "text-blue-500" : "text-foreground"
+      }`}>
+        {previewScore}
+      </span>
 
       {/* Down arrow */}
       <Button
-        variant={votedDown ? "destructive" : pendingWeight < 0 ? "outline" : "ghost"}
+        variant="ghost"
         size="sm"
-        className={`h-8 w-8 p-0 ${pendingWeight < 0 ? "border-destructive bg-destructive/10" : ""}`}
+        className={`h-10 w-10 p-0 rounded-md transition-all ${
+          isDownvoted
+            ? "text-blue-500 bg-blue-500/10 hover:bg-blue-500/20"
+            : "text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10"
+        } ${(hasVoted && !votedDown) ? "opacity-30 pointer-events-none" : ""}`}
         onClick={() => {
           if (votedDown) {
             removeVote();
@@ -174,30 +170,41 @@ export function VoteButtons({
         disabled={disabled || isVoting || (hasVoted && !votedDown)}
         title={votedDown ? "Remove downvote" : "Add downvote"}
       >
-        {isVoting ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+        {isVoting && votedDown ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
-          <ChevronDown className="h-5 w-5" />
+          <ChevronDown className="h-7 w-7" strokeWidth={2.5} />
         )}
       </Button>
 
       {/* Existing vote display */}
       {hasVoted && !hasPending && (
-        <span className="text-xs text-muted-foreground">
-          Your vote: {userVote.effectiveWeight > 0 ? "+" : ""}
+        <Badge
+          variant="secondary"
+          className={`text-xs mt-1 ${
+            votedUp
+              ? "bg-orange-500/20 text-orange-600"
+              : "bg-blue-500/20 text-blue-600"
+          }`}
+        >
+          {userVote.effectiveWeight > 0 ? "+" : ""}
           {userVote.effectiveWeight}
-        </span>
+        </Badge>
       )}
 
       {/* Pending vote info and confirm/cancel */}
       {hasPending && (
         <div className="flex flex-col items-center gap-1 mt-1">
-          <span className="text-xs font-medium">
-            {pendingWeight > 0 ? "+" : ""}{pendingWeight} vote{Math.abs(pendingWeight) !== 1 ? "s" : ""}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {pendingCost} credit{pendingCost !== 1 ? "s" : ""}
-          </span>
+          <Badge
+            variant="outline"
+            className={`text-xs ${
+              pendingWeight > 0
+                ? "border-orange-500/50 text-orange-600 bg-orange-500/10"
+                : "border-blue-500/50 text-blue-600 bg-blue-500/10"
+            }`}
+          >
+            {pendingWeight > 0 ? "+" : ""}{pendingWeight} = {pendingCost}¢
+          </Badge>
           <div className="flex gap-1 mt-1">
             <Button
               variant="ghost"
@@ -209,9 +216,12 @@ export function VoteButtons({
               <X className="h-3 w-3" />
             </Button>
             <Button
-              variant={pendingWeight > 0 ? "default" : "destructive"}
               size="sm"
-              className="h-6 px-2 text-xs"
+              className={`h-6 px-2 text-xs ${
+                pendingWeight > 0
+                  ? "bg-orange-500 hover:bg-orange-600"
+                  : "bg-blue-500 hover:bg-blue-600"
+              }`}
               onClick={submitVote}
               disabled={isVoting || !canAfford}
               title="Confirm vote"

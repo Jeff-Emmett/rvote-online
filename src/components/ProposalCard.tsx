@@ -33,10 +33,10 @@ interface ProposalCardProps {
 }
 
 const statusColors: Record<ProposalStatus, string> = {
-  RANKING: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-  VOTING: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-  PASSED: "bg-green-500/10 text-green-500 border-green-500/20",
-  FAILED: "bg-red-500/10 text-red-500 border-red-500/20",
+  RANKING: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  VOTING: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+  PASSED: "bg-green-500/10 text-green-600 border-green-500/20",
+  FAILED: "bg-red-500/10 text-red-600 border-red-500/20",
   ARCHIVED: "bg-gray-500/10 text-gray-500 border-gray-500/20",
 };
 
@@ -81,10 +81,16 @@ export function ProposalCard({
   const isVoting = proposal.status === "VOTING";
   const progressToVoting = isRanking ? Math.min((score / 100) * 100, 100) : 100;
 
+  const hasVoted = currentVote && currentVote.weight !== 0;
+  const isUpvoted = hasVoted && currentVote.weight > 0;
+  const isDownvoted = hasVoted && currentVote.weight < 0;
+
   return (
-    <Card className="flex">
+    <div className={`flex rounded-xl border bg-card shadow-sm overflow-hidden transition-all ${
+      isUpvoted ? "ring-1 ring-orange-500/30" : isDownvoted ? "ring-1 ring-blue-500/30" : ""
+    }`}>
       {showVoting && isRanking && (
-        <div className="flex items-center justify-center px-4 border-r bg-muted/30">
+        <div className="flex items-center justify-center py-3 px-4 bg-muted/50 border-r min-w-[80px]">
           <VoteButtons
             proposalId={proposal.id}
             currentScore={score}
@@ -95,8 +101,8 @@ export function ProposalCard({
         </div>
       )}
 
-      <div className="flex-1 min-w-0">
-        <CardHeader className="pb-2">
+      <div className="flex-1 min-w-0 flex flex-col">
+        <CardHeader className="pb-2 pt-4">
           <div className="flex items-start justify-between gap-2">
             <Link
               href={`/proposals/${proposal.id}`}
@@ -124,11 +130,15 @@ export function ProposalCard({
                   <TrendingUp className="h-3 w-3" />
                   Progress to voting
                 </span>
-                <span>{score}/100</span>
+                <span className={isUpvoted ? "text-orange-500 font-medium" : isDownvoted ? "text-blue-500 font-medium" : ""}>
+                  {score}/100
+                </span>
               </div>
-              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-primary transition-all duration-300"
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    isUpvoted ? "bg-orange-500" : isDownvoted ? "bg-blue-500" : "bg-primary"
+                  }`}
                   style={{ width: `${progressToVoting}%` }}
                 />
               </div>
@@ -143,7 +153,7 @@ export function ProposalCard({
           )}
         </CardContent>
 
-        <CardFooter className="pt-2 text-xs text-muted-foreground">
+        <CardFooter className="pt-2 pb-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
               <User className="h-3 w-3" />
@@ -156,6 +166,6 @@ export function ProposalCard({
           </div>
         </CardFooter>
       </div>
-    </Card>
+    </div>
   );
 }
