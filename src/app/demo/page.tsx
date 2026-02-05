@@ -140,9 +140,9 @@ export default function DemoPage() {
         <Badge variant="secondary" className="text-sm">
           Interactive Demo
         </Badge>
-        <h1 className="text-4xl font-bold">Try Quadratic Voting</h1>
+        <h1 className="text-4xl font-bold">Try Quadratic Proposal Ranking</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Experience how rVote works without creating an account. Vote on these
+          Experience how rVote works without creating an account. Rank these
           sample proposals and see the quadratic cost in action.
         </p>
       </div>
@@ -173,7 +173,7 @@ export default function DemoPage() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
-            Quadratic Voting Cost
+            Quadratic Ranking Cost
           </CardTitle>
           <CardDescription>
             The more votes you put on one proposal, the more each additional
