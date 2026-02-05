@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "rVote - Quadratic Voting for Community Governance",
+  title: "rVote - Quadratic Proposal Ranking for Community Governance",
   description:
-    "A Reddit-style proposal ranking platform with quadratic voting. Proposals are ranked by members, and top proposals advance to pass/fail voting.",
-  keywords: ["voting", "governance", "quadratic voting", "proposals", "community"],
+    "A democratic backlog prioritization platform with quadratic proposal ranking. Proposals are ranked by members, and top proposals advance to pass/fail voting.",
+  keywords: ["ranking", "governance", "quadratic proposal ranking", "proposals", "community", "backlog prioritization"],
 };
 
 export default function RootLayout({
