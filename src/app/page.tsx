@@ -1,11 +1,7 @@
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { ProposalList } from "@/components/ProposalList";
+import { InteractiveDemo } from "@/components/InteractiveDemo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { calculateAvailableCredits } from "@/lib/credits";
-import { getEffectiveWeight } from "@/lib/voting";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -21,62 +17,10 @@ import {
   Play,
   ListOrdered,
   Target,
-  Layers,
   ChevronUp,
 } from "lucide-react";
 
-export default async function HomePage() {
-  const session = await auth();
-
-  // Get top ranking proposals
-  const proposals = await prisma.proposal.findMany({
-    where: { status: "RANKING" },
-    orderBy: { score: "desc" },
-    take: 5,
-    include: {
-      author: {
-        select: { id: true, name: true, email: true },
-      },
-      votes: true,
-    },
-  });
-
-  // Get user's votes and credits if logged in
-  let availableCredits = 0;
-  let userVotes: { proposalId: string; weight: number; effectiveWeight: number }[] = [];
-
-  if (session?.user?.id) {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { credits: true, lastCreditAt: true },
-    });
-
-    if (user) {
-      availableCredits = calculateAvailableCredits(user.credits, user.lastCreditAt);
-    }
-
-    const votes = await prisma.vote.findMany({
-      where: {
-        userId: session.user.id,
-        proposalId: { in: proposals.map((p) => p.id) },
-      },
-    });
-
-    userVotes = votes.map((v) => ({
-      proposalId: v.proposalId,
-      weight: v.weight,
-      effectiveWeight: getEffectiveWeight(v.weight, v.createdAt),
-    }));
-  }
-
-  // Get counts for stats
-  const [rankingCount, votingCount, passedCount, userCount] = await Promise.all([
-    prisma.proposal.count({ where: { status: "RANKING" } }),
-    prisma.proposal.count({ where: { status: "VOTING" } }),
-    prisma.proposal.count({ where: { status: "PASSED" } }),
-    prisma.user.count(),
-  ]);
-
+export default function HomePage() {
   return (
     <div className="space-y-16">
       {/* Hero section */}
@@ -104,15 +48,9 @@ export default async function HomePage() {
               Try the Demo
             </Link>
           </Button>
-          {!session?.user ? (
-            <Button asChild variant="outline" size="lg" className="text-lg px-8 border-primary/30 hover:bg-primary/5">
-              <Link href="/auth/signup">Create Account</Link>
-            </Button>
-          ) : (
-            <Button asChild variant="outline" size="lg" className="text-lg px-8 border-primary/30 hover:bg-primary/5">
-              <Link href="/proposals">Browse Proposals</Link>
-            </Button>
-          )}
+          <Button asChild variant="outline" size="lg" className="text-lg px-8 border-primary/30 hover:bg-primary/5">
+            <Link href="/auth/signup">Create a Space</Link>
+          </Button>
         </div>
       </section>
 
@@ -137,7 +75,7 @@ export default async function HomePage() {
             <CardContent className="pt-5 pb-4">
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">x²</span>
+                  <span className="text-white font-bold text-sm">x&sup2;</span>
                 </div>
                 <h3 className="font-bold text-orange-600 text-lg">Quadratic</h3>
               </div>
@@ -179,6 +117,22 @@ export default async function HomePage() {
               </p>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      {/* Interactive Demo inline */}
+      <section className="py-8">
+        <div className="text-center mb-6">
+          <Badge variant="secondary" className="mb-3">
+            Interactive Demo
+          </Badge>
+          <h2 className="text-2xl font-bold">Try It Yourself</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Click the vote arrows to rank proposals. Watch how quadratic costs scale in real-time.
+          </p>
+        </div>
+        <div className="max-w-4xl mx-auto">
+          <InteractiveDemo />
         </div>
       </section>
 
@@ -431,57 +385,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Stats */}
-      {(rankingCount > 0 || userCount > 1) && (
-        <section className="py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
-              <CardContent className="pt-6 text-center">
-                <div className="text-3xl font-bold text-primary">{userCount}</div>
-                <p className="text-sm text-muted-foreground">Members</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-accent/10 to-transparent border-accent/20">
-              <CardContent className="pt-6 text-center">
-                <div className="text-3xl font-bold text-accent">{rankingCount}</div>
-                <p className="text-sm text-muted-foreground">Being Ranked</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-secondary/10 to-transparent border-secondary/20">
-              <CardContent className="pt-6 text-center">
-                <div className="text-3xl font-bold text-secondary">{votingCount}</div>
-                <p className="text-sm text-muted-foreground">In Voting</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-green-500/10 to-transparent border-green-500/20">
-              <CardContent className="pt-6 text-center">
-                <div className="text-3xl font-bold text-green-600">{passedCount}</div>
-                <p className="text-sm text-muted-foreground">Passed</p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-      )}
-
-      {/* Active proposals */}
-      {proposals.length > 0 && (
-        <section className="py-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Active Proposals</h2>
-            <Button asChild variant="ghost" className="text-primary hover:text-primary/80">
-              <Link href="/proposals">
-                View All <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-          <ProposalList
-            proposals={proposals}
-            userVotes={userVotes}
-            availableCredits={availableCredits}
-          />
-        </section>
-      )}
-
       {/* CTA */}
       <section className="py-12">
         <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 overflow-hidden relative">
@@ -491,24 +394,22 @@ export default async function HomePage() {
             <Badge className="bg-primary/10 text-primary border-primary/20">Join the rSpace Ecosystem</Badge>
             <h2 className="text-3xl font-bold">Ready to prioritize democratically?</h2>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-              Experience Quadratic Proposal Ranking firsthand. Try the interactive demo or
-              create an account to start building your community&apos;s backlog together.
+              Create a Space for your community and start using Quadratic Proposal Ranking.
+              Invite members, allot credits, and let the best ideas rise to the top.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button asChild size="lg" className="text-lg px-8 bg-gradient-to-r from-primary to-accent hover:opacity-90">
+                <Link href="/spaces/new">
+                  Create a Space
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="text-lg px-8 border-primary/30 hover:bg-primary/5">
                 <Link href="/demo">
                   <Play className="mr-2 h-5 w-5" />
                   Interactive Demo
                 </Link>
               </Button>
-              {!session?.user && (
-                <Button asChild variant="outline" size="lg" className="text-lg px-8 border-primary/30 hover:bg-primary/5">
-                  <Link href="/auth/signup">
-                    Create Free Account
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-              )}
             </div>
           </CardContent>
         </Card>

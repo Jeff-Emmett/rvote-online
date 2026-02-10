@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronUp, ChevronDown, Loader2, Check, X } from "lucide-react";
@@ -15,6 +16,8 @@ interface VoteButtonsProps {
     effectiveWeight: number;
   };
   availableCredits: number;
+  isAuthenticated?: boolean;
+  spaceSlug?: string;
   onVote?: (newScore: number, newWeight: number) => void;
   disabled?: boolean;
 }
@@ -24,9 +27,12 @@ export function VoteButtons({
   currentScore,
   userVote,
   availableCredits,
+  isAuthenticated = true,
+  spaceSlug,
   onVote,
   disabled = false,
 }: VoteButtonsProps) {
+  const router = useRouter();
   const [isVoting, setIsVoting] = useState(false);
   const [pendingWeight, setPendingWeight] = useState(0);
 
@@ -85,7 +91,17 @@ export function VoteButtons({
     }
   }
 
+  function requireAuth(): boolean {
+    if (!isAuthenticated) {
+      toast.error("Sign in to vote on proposals");
+      router.push("/auth/signin");
+      return false;
+    }
+    return true;
+  }
+
   function incrementVote() {
+    if (!requireAuth()) return;
     const newWeight = pendingWeight + 1;
     const newCost = calculateVoteCost(Math.abs(newWeight));
     if (newCost <= availableCredits) {
@@ -94,6 +110,7 @@ export function VoteButtons({
   }
 
   function decrementVote() {
+    if (!requireAuth()) return;
     const newWeight = pendingWeight - 1;
     const newCost = calculateVoteCost(Math.abs(newWeight));
     if (newCost <= availableCredits) {

@@ -24,6 +24,9 @@ model User {
   // NextAuth fields
   accounts      Account[]
   sessions      Session[]
+
+  // Space memberships
+  spaceMemberships SpaceMember[]
 }
 
 model Account {
@@ -61,12 +64,85 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// ─── Spaces (Multi-Tenant) ───────────────────────────────────────────
+
+model Space {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String? @db.Text
+  isPublic    Boolean @default(false)
+
+  // Configurable per-space voting parameters
+  promotionThreshold Int @default(100)
+  votingPeriodDays   Int @default(7)
+  creditsPerDay      Int @default(10)
+  maxCredits         Int @default(500)
+  startingCredits    Int @default(50)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members   SpaceMember[]
+  proposals Proposal[]
+  invites   SpaceInvite[]
+}
+
+enum SpaceRole {
+  ADMIN
+  MEMBER
+}
+
+model SpaceMember {
+  id       String    @id @default(cuid())
+  userId   String
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spaceId  String
+  space    Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  role     SpaceRole @default(MEMBER)
+
+  // Per-space credits
+  credits      Int      @default(0)
+  lastCreditAt DateTime @default(now())
+
+  joinedAt DateTime @default(now())
+
+  @@unique([userId, spaceId])
+  @@index([spaceId])
+}
+
+model SpaceInvite {
+  id        String    @id @default(cuid())
+  spaceId   String
+  space     Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  // For email invites
+  email     String?
+
+  // For shareable link invites
+  token     String    @unique @default(cuid())
+
+  // Invite metadata
+  maxUses   Int?
+  uses      Int       @default(0)
+  expiresAt DateTime?
+  createdBy String
+  createdAt DateTime  @default(now())
+
+  @@index([token])
+  @@index([email, spaceId])
+}
+
+// ─── Proposals & Voting ──────────────────────────────────────────────
+
 model Proposal {
   id           String         @id @default(cuid())
   title        String
   description  String         @db.Text
   authorId     String
   author       User           @relation(fields: [authorId], references: [id])
+  spaceId      String?
+  space        Space?         @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   status       ProposalStatus @default(RANKING)
   score        Int            @default(0)
   votes        Vote[]
@@ -74,6 +150,8 @@ model Proposal {
   votingEndsAt DateTime?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+
+  @@index([spaceId, status])
 }
 
 enum ProposalStatus {

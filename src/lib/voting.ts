@@ -74,15 +74,15 @@ export function getFullDecayDate(createdAt: Date): Date {
 /**
  * Check if a proposal should be promoted to voting stage
  */
-export function shouldPromote(score: number): boolean {
-  return score >= PROMOTION_THRESHOLD;
+export function shouldPromote(score: number, threshold: number = PROMOTION_THRESHOLD): boolean {
+  return score >= threshold;
 }
 
 /**
  * Calculate the voting end date from promotion time
  */
-export function getVotingEndDate(promotedAt: Date = new Date()): Date {
-  return addDays(promotedAt, VOTING_PERIOD_DAYS);
+export function getVotingEndDate(promotedAt: Date = new Date(), periodDays: number = VOTING_PERIOD_DAYS): Date {
+  return addDays(promotedAt, periodDays);
 }
 
 /**

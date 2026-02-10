@@ -12,14 +12,16 @@ import { toast } from "sonner";
 
 interface FinalVotePanelProps {
   proposalId: string;
-  votingEndsAt: Date | string;
-  votes: {
+  votingEndsAt?: Date | string;
+  votes?: {
     yes: number;
     no: number;
     abstain: number;
     total: number;
   };
   userVote?: VoteChoice;
+  isAuthenticated?: boolean;
+  spaceSlug?: string;
   result?: "PASSED" | "FAILED" | null;
   onVote?: (newVotes: { yes: number; no: number; abstain: number; total: number }, userVote: VoteChoice) => void;
 }
@@ -27,8 +29,10 @@ interface FinalVotePanelProps {
 export function FinalVotePanel({
   proposalId,
   votingEndsAt,
-  votes: initialVotes,
+  votes: initialVotes = { yes: 0, no: 0, abstain: 0, total: 0 },
   userVote: initialUserVote,
+  isAuthenticated = true,
+  spaceSlug,
   result,
   onVote,
 }: FinalVotePanelProps) {
@@ -36,8 +40,10 @@ export function FinalVotePanel({
   const [userVote, setUserVote] = useState(initialUserVote);
   const [isVoting, setIsVoting] = useState(false);
 
-  const endDate = typeof votingEndsAt === "string" ? new Date(votingEndsAt) : votingEndsAt;
-  const isEnded = endDate < new Date();
+  const endDate = votingEndsAt
+    ? (typeof votingEndsAt === "string" ? new Date(votingEndsAt) : votingEndsAt)
+    : null;
+  const isEnded = endDate ? endDate < new Date() : false;
   const canVote = !isEnded && !result;
 
   const yesPercentage = votes.total > 0 ? (votes.yes / votes.total) * 100 : 50;
@@ -81,7 +87,7 @@ export function FinalVotePanel({
           ) : (
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
-              {isEnded ? "Voting ended" : `Ends ${formatDistanceToNow(endDate, { addSuffix: true })}`}
+              {!endDate ? "Open" : isEnded ? "Voting ended" : `Ends ${formatDistanceToNow(endDate, { addSuffix: true })}`}
             </div>
           )}
         </div>

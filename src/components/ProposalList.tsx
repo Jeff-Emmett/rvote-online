@@ -28,6 +28,8 @@ interface ProposalListProps {
   proposals: Proposal[];
   userVotes?: UserVote[];
   availableCredits: number;
+  isAuthenticated?: boolean;
+  spaceSlug?: string;
   emptyMessage?: string;
 }
 
@@ -35,6 +37,8 @@ export function ProposalList({
   proposals,
   userVotes = [],
   availableCredits,
+  isAuthenticated = false,
+  spaceSlug,
   emptyMessage = "No proposals found.",
 }: ProposalListProps) {
   if (proposals.length === 0) {
@@ -55,6 +59,8 @@ export function ProposalList({
           proposal={proposal}
           userVote={voteMap.get(proposal.id)}
           availableCredits={availableCredits}
+          isAuthenticated={isAuthenticated}
+          spaceSlug={spaceSlug}
         />
       ))}
     </div>

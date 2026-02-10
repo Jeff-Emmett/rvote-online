@@ -29,6 +29,8 @@ interface ProposalCardProps {
     effectiveWeight: number;
   };
   availableCredits: number;
+  isAuthenticated?: boolean;
+  spaceSlug?: string;
   showVoting?: boolean;
 }
 
@@ -52,6 +54,8 @@ export function ProposalCard({
   proposal,
   userVote,
   availableCredits,
+  isAuthenticated = false,
+  spaceSlug,
   showVoting = true,
 }: ProposalCardProps) {
   const [score, setScore] = useState(proposal.score);
@@ -96,6 +100,7 @@ export function ProposalCard({
             currentScore={score}
             userVote={currentVote}
             availableCredits={availableCredits}
+            isAuthenticated={isAuthenticated}
             onVote={handleVote}
           />
         </div>

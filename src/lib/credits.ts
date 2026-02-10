@@ -1,27 +1,29 @@
-import { differenceInDays, differenceInHours } from "date-fns";
+import { differenceInHours } from "date-fns";
 
-// Credits earned per day
+// Default credits earned per day (can be overridden per-space)
 export const CREDITS_PER_DAY = 10;
 
-// Maximum credits a user can accumulate
+// Default maximum credits a user can accumulate (can be overridden per-space)
 export const MAX_CREDITS = 500;
 
 /**
- * Calculate total available credits for a user
- * Includes stored credits plus earned credits since last claim
+ * Calculate total available credits for a user.
+ * Accepts optional per-space config overrides.
  */
 export function calculateAvailableCredits(
   storedCredits: number,
-  lastCreditAt: Date
+  lastCreditAt: Date,
+  creditsPerDay: number = CREDITS_PER_DAY,
+  maxCredits: number = MAX_CREDITS
 ): number {
   const hoursSinceLastClaim = differenceInHours(new Date(), lastCreditAt);
-  const earnedCredits = Math.floor((hoursSinceLastClaim / 24) * CREDITS_PER_DAY);
+  const earnedCredits = Math.floor((hoursSinceLastClaim / 24) * creditsPerDay);
   const totalCredits = storedCredits + earnedCredits;
-  return Math.min(totalCredits, MAX_CREDITS);
+  return Math.min(totalCredits, maxCredits);
 }
 
 /**
- * Calculate the quadratic cost of a vote
+ * Calculate the quadratic cost of a vote.
  * Cost = weight^2 (1 vote = 1 credit, 2 votes = 4, 3 votes = 9, etc.)
  */
 export function calculateVoteCost(weight: number): number {
@@ -29,16 +31,15 @@ export function calculateVoteCost(weight: number): number {
 }
 
 /**
- * Calculate the maximum vote weight a user can afford
+ * Calculate the maximum vote weight a user can afford.
  */
 export function maxAffordableWeight(availableCredits: number): number {
   return Math.floor(Math.sqrt(availableCredits));
 }
 
 /**
- * Calculate credits to return when a vote fully decays
+ * Calculate credits to return when a vote fully decays.
  */
 export function calculateDecayedCredits(creditCost: number): number {
-  // Return the full credit cost when vote decays
   return creditCost;
 }

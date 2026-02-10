@@ -32,10 +32,10 @@ export function Navbar() {
                 Proposals
               </Link>
               <Link
-                href="/voting"
+                href="/spaces"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                Voting
+                Spaces
               </Link>
             </div>
           </div>
