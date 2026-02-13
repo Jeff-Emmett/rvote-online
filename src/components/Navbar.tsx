@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CreditDisplay } from "./CreditDisplay";
 import {
@@ -15,6 +16,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function Navbar() {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
+
+  // Hide the main navbar on space pages — SpaceNav handles navigation there
+  if (pathname.startsWith("/s/")) {
+    return null;
+  }
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -26,10 +33,10 @@ export function Navbar() {
             </Link>
             <div className="hidden md:flex items-center gap-4">
               <Link
-                href="/proposals"
+                href="/demo"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                Proposals
+                Demo
               </Link>
               <Link
                 href="/spaces"
@@ -79,7 +86,7 @@ export function Navbar() {
                       <Link href="/profile">Profile</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/proposals/new">New Proposal</Link>
+                      <Link href="/spaces">My Spaces</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
