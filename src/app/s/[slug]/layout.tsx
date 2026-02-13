@@ -41,7 +41,7 @@ export default async function SpaceLayout({
         name: space.name,
         slug: space.slug,
         description: space.description,
-        isPublic: space.isPublic,
+        visibility: space.visibility,
         promotionThreshold: space.promotionThreshold,
         votingPeriodDays: space.votingPeriodDays,
         creditsPerDay: space.creditsPerDay,

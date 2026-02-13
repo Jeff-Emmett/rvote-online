@@ -72,7 +72,8 @@ model Space {
   name        String
   slug        String  @unique
   description String? @db.Text
-  isPublic    Boolean @default(false)
+  visibility  String  @default("public_read") // public, public_read, authenticated, members_only
+  ownerDid    String?
 
   // Configurable per-space voting parameters
   promotionThreshold Int @default(100)

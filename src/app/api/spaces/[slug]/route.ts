@@ -1,9 +1,10 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireSpaceAdmin, requireSpaceMembership } from "@/lib/spaces";
+import { checkSpaceAccess } from "@encryptid/sdk/server/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
-// GET /api/spaces/[slug] — Get space details
+// GET /api/spaces/[slug] — Get space details (respects visibility)
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -21,7 +22,24 @@ export async function GET(
     return NextResponse.json({ error: "Space not found" }, { status: 404 });
   }
 
-  return NextResponse.json(space);
+  // Check space visibility
+  const access = await checkSpaceAccess(req, slug, {
+    getSpaceConfig: async () => ({
+      spaceSlug: slug,
+      visibility: (space.visibility as any) || "public_read",
+      ownerDID: space.ownerDid || undefined,
+      app: "rvote",
+    }),
+  });
+
+  if (!access.allowed) {
+    return NextResponse.json(
+      { error: access.reason },
+      { status: access.claims ? 403 : 401 }
+    );
+  }
+
+  return NextResponse.json({ ...space, readOnly: access.readOnly });
 }
 
 // PATCH /api/spaces/[slug] — Update space (admin only)
@@ -44,7 +62,7 @@ export async function PATCH(
 
   const body = await req.json();
   const allowedFields = [
-    "name", "description", "isPublic",
+    "name", "description", "visibility",
     "promotionThreshold", "votingPeriodDays",
     "creditsPerDay", "maxCredits", "startingCredits",
   ];

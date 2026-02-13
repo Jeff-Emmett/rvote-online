@@ -40,7 +40,16 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { name, description, slug: requestedSlug } = body;
+  const { name, description, slug: requestedSlug, visibility = "public_read" } = body;
+
+  // Validate visibility
+  const validVisibilities = ["public", "public_read", "authenticated", "members_only"];
+  if (!validVisibilities.includes(visibility)) {
+    return NextResponse.json(
+      { error: `Invalid visibility. Must be one of: ${validVisibilities.join(", ")}` },
+      { status: 400 }
+    );
+  }
 
   if (!name || typeof name !== "string" || name.trim().length === 0) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -67,6 +76,8 @@ export async function POST(req: NextRequest) {
         name: name.trim(),
         slug,
         description: description?.trim() || null,
+        visibility,
+        ownerDid: session.user.did || null,
       },
     });
 

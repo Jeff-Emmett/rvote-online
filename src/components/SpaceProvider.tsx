@@ -8,7 +8,7 @@ interface SpaceContextValue {
     name: string;
     slug: string;
     description: string | null;
-    isPublic: boolean;
+    visibility: string;
     promotionThreshold: number;
     votingPeriodDays: number;
     creditsPerDay: number;

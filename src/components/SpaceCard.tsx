@@ -8,7 +8,7 @@ interface SpaceCardProps {
     name: string;
     slug: string;
     description: string | null;
-    isPublic: boolean;
+    visibility: string;
     _count: {
       members: number;
       proposals: number;
@@ -32,8 +32,14 @@ export function SpaceCard({ space }: SpaceCardProps) {
               {space.role === "ADMIN" && (
                 <Badge variant="secondary" className="text-xs">Admin</Badge>
               )}
-              {space.isPublic && (
+              {(space.visibility === "public" || space.visibility === "public_read") && (
                 <Badge variant="outline" className="text-xs">Public</Badge>
+              )}
+              {space.visibility === "authenticated" && (
+                <Badge variant="outline" className="text-xs">Login Required</Badge>
+              )}
+              {space.visibility === "members_only" && (
+                <Badge variant="outline" className="text-xs">Members Only</Badge>
               )}
             </div>
           </div>
