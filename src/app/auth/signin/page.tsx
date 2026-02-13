@@ -64,13 +64,13 @@ function SignInForm() {
       const challenge = Uint8Array.from(atob(options.challenge.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
 
       const publicKeyOptions: PublicKeyCredentialRequestOptions = {
-        challenge,
+        challenge: challenge.buffer as ArrayBuffer,
         rpId: options.rpId,
         userVerification: options.userVerification as UserVerificationRequirement,
         timeout: options.timeout,
         allowCredentials: options.allowCredentials?.map((c: { type: string; id: string; transports?: string[] }) => ({
           type: c.type as PublicKeyCredentialType,
-          id: Uint8Array.from(atob(c.id.replace(/-/g, "+").replace(/_/g, "/")), ch => ch.charCodeAt(0)),
+          id: Uint8Array.from(atob(c.id.replace(/-/g, "+").replace(/_/g, "/")), ch => ch.charCodeAt(0)).buffer as ArrayBuffer,
           transports: c.transports as AuthenticatorTransport[],
         })),
       };

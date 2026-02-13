@@ -94,10 +94,10 @@ export default function SignUpPage() {
       }
 
       const publicKeyOptions: PublicKeyCredentialCreationOptions = {
-        challenge: fromBase64url(options.challenge),
+        challenge: fromBase64url(options.challenge).buffer as ArrayBuffer,
         rp: options.rp,
         user: {
-          id: fromBase64url(options.user.id),
+          id: fromBase64url(options.user.id).buffer as ArrayBuffer,
           name: options.user.name,
           displayName: options.user.displayName,
         },
