@@ -12,6 +12,7 @@ model User {
   email         String    @unique
   passwordHash  String?
   name          String?
+  did           String?   @unique  // EncryptID DID (passkey identity)
   credits       Int       @default(0)
   lastCreditAt  DateTime  @default(now())
   emailVerified DateTime?
