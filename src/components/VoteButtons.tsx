@@ -226,15 +226,15 @@ export function VoteButtons({
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0"
+              className="h-8 w-8 p-0"
               onClick={cancelPending}
               title="Cancel"
             >
-              <X className="h-3 w-3" />
+              <X className="h-4 w-4" />
             </Button>
             <Button
               size="sm"
-              className={`h-6 px-2 text-xs ${
+              className={`h-8 px-3 text-xs ${
                 pendingWeight > 0
                   ? "bg-orange-500 hover:bg-orange-600"
                   : "bg-blue-500 hover:bg-blue-600"
@@ -244,10 +244,10 @@ export function VoteButtons({
               title="Confirm vote"
             >
               {isVoting ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  <Check className="h-3 w-3 mr-1" />
+                  <Check className="h-4 w-4 mr-1" />
                   Cast
                 </>
               )}

@@ -92,7 +92,7 @@ export function MemberList({ members: initialMembers, spaceSlug, isAdmin, curren
       {members.map((member) => (
         <Card key={member.id}>
           <CardContent className="py-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarFallback>
@@ -109,7 +109,7 @@ export function MemberList({ members: initialMembers, spaceSlug, isAdmin, curren
                       </Badge>
                     )}
                   </div>
-                  <div className="text-sm text-muted-foreground flex items-center gap-3">
+                  <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1">
                     <span>{member.user.email}</span>
                     <span className="flex items-center gap-1">
                       <Coins className="h-3 w-3 text-orange-500" />
@@ -120,7 +120,7 @@ export function MemberList({ members: initialMembers, spaceSlug, isAdmin, curren
               </div>
 
               {isAdmin && member.user.id !== currentUserId && (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <div className="flex items-center gap-1">
                     <Input
                       type="number"

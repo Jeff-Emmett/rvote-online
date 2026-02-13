@@ -159,11 +159,11 @@ export function InteractiveDemo() {
       <Card className="border-2 border-orange-500/30 bg-gradient-to-r from-orange-500/10 to-amber-500/10">
         <CardContent className="py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <div className="flex items-center gap-2">
-                <Coins className="h-6 w-6 text-orange-500" />
-                <span className="font-bold text-2xl text-orange-600">{credits}</span>
-                <span className="text-muted-foreground">credits</span>
+                <Coins className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500" />
+                <span className="font-bold text-xl sm:text-2xl text-orange-600">{credits}</span>
+                <span className="text-muted-foreground text-sm sm:text-base">credits</span>
               </div>
               <Badge variant="outline" className="border-orange-500/30 text-orange-600">
                 Max vote: &plusmn;{maxWeight}
@@ -187,11 +187,11 @@ export function InteractiveDemo() {
           <CardDescription>Each additional vote costs exponentially more credits</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-5 gap-2 text-center text-sm">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 text-center text-sm">
             {[1, 2, 3, 4, 5].map((w) => (
               <div
                 key={w}
-                className={`p-3 rounded-lg border-2 transition-all ${
+                className={`p-2 sm:p-3 rounded-lg border-2 transition-all ${
                   w <= maxWeight
                     ? "bg-orange-500/10 border-orange-500/40 text-orange-700"
                     : "bg-muted/50 border-muted text-muted-foreground"

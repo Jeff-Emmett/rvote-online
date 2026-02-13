@@ -95,7 +95,7 @@ export function FinalVotePanel({
 
       <CardContent className="space-y-4">
         {/* Vote counts */}
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
           <div>
             <div className="text-2xl font-bold text-green-500">{votes.yes}</div>
             <div className="text-sm text-muted-foreground">Yes</div>
@@ -138,10 +138,10 @@ export function FinalVotePanel({
                 You voted: <Badge variant="outline">{userVote}</Badge>
               </p>
             )}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
               <Button
                 variant={userVote === "YES" ? "default" : "outline"}
-                className="flex-col h-auto py-3"
+                className="flex-col h-auto py-2 sm:py-3"
                 onClick={() => castVote("YES")}
                 disabled={isVoting}
               >
@@ -154,7 +154,7 @@ export function FinalVotePanel({
               </Button>
               <Button
                 variant={userVote === "NO" ? "destructive" : "outline"}
-                className="flex-col h-auto py-3"
+                className="flex-col h-auto py-2 sm:py-3"
                 onClick={() => castVote("NO")}
                 disabled={isVoting}
               >
@@ -167,7 +167,7 @@ export function FinalVotePanel({
               </Button>
               <Button
                 variant={userVote === "ABSTAIN" ? "secondary" : "outline"}
-                className="flex-col h-auto py-3"
+                className="flex-col h-auto py-2 sm:py-3"
                 onClick={() => castVote("ABSTAIN")}
                 disabled={isVoting}
               >

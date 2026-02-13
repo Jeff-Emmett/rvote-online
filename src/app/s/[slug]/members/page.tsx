@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { MemberList } from "@/components/MemberList";
 import { InviteDialog } from "@/components/InviteDialog";
+import { InviteList } from "@/components/InviteList";
 import { Badge } from "@/components/ui/badge";
 
 export default async function SpaceMembersPage({
@@ -38,7 +39,7 @@ export default async function SpaceMembersPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold">Members</h2>
           <p className="text-muted-foreground">
@@ -54,6 +55,13 @@ export default async function SpaceMembersPage({
         isAdmin={membership.role === "ADMIN"}
         currentUserId={session.user.id}
       />
+
+      {membership.role === "ADMIN" && (
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold">Active Invites</h3>
+          <InviteList spaceSlug={slug} />
+        </div>
+      )}
     </div>
   );
 }

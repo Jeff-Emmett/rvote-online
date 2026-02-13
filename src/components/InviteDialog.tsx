@@ -24,6 +24,7 @@ export function InviteDialog({ spaceSlug }: InviteDialogProps) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [maxUses, setMaxUses] = useState("");
+  const [expiresIn, setExpiresIn] = useState("");
   const [inviteUrl, setInviteUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -33,6 +34,10 @@ export function InviteDialog({ spaceSlug }: InviteDialogProps) {
       const body: Record<string, unknown> = {};
       if (email) body.email = email;
       if (maxUses) body.maxUses = parseInt(maxUses);
+      if (expiresIn) {
+        const hours = parseInt(expiresIn);
+        body.expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+      }
 
       const res = await fetch(`/api/spaces/${spaceSlug}/invites`, {
         method: "POST",
@@ -61,6 +66,7 @@ export function InviteDialog({ spaceSlug }: InviteDialogProps) {
   function reset() {
     setEmail("");
     setMaxUses("");
+    setExpiresIn("");
     setInviteUrl("");
     setOpen(false);
   }
@@ -68,7 +74,7 @@ export function InviteDialog({ spaceSlug }: InviteDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
       <DialogTrigger asChild>
-        <Button>
+        <Button size="sm" className="sm:size-default">
           <UserPlus className="h-4 w-4 mr-2" />
           Create Invite
         </Button>
@@ -84,7 +90,7 @@ export function InviteDialog({ spaceSlug }: InviteDialogProps) {
         {!inviteUrl ? (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="email">Restrict to email (optional)</Label>
+              <Label htmlFor="email">Restrict to email</Label>
               <Input
                 id="email"
                 type="email"
@@ -92,16 +98,33 @@ export function InviteDialog({ spaceSlug }: InviteDialogProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                If set, only this email address can use the invite link.
+              </p>
             </div>
-            <div>
-              <Label htmlFor="maxUses">Max uses (optional)</Label>
-              <Input
-                id="maxUses"
-                type="number"
-                placeholder="Unlimited"
-                value={maxUses}
-                onChange={(e) => setMaxUses(e.target.value)}
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="maxUses">Max uses</Label>
+                <Input
+                  id="maxUses"
+                  type="number"
+                  min="1"
+                  placeholder="Unlimited"
+                  value={maxUses}
+                  onChange={(e) => setMaxUses(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="expiresIn">Expires in (hours)</Label>
+                <Input
+                  id="expiresIn"
+                  type="number"
+                  min="1"
+                  placeholder="Never"
+                  value={expiresIn}
+                  onChange={(e) => setExpiresIn(e.target.value)}
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button onClick={createInvite} disabled={loading}>

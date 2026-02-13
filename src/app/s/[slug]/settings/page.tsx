@@ -88,7 +88,7 @@ export default function SpaceSettingsPage() {
             <CardTitle>Voting Configuration</CardTitle>
             <CardDescription>Controls how proposals are ranked and promoted</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="threshold">Promotion Threshold</Label>
               <Input id="threshold" type="number" value={promotionThreshold} onChange={(e) => setPromotionThreshold(e.target.value)} />
@@ -107,7 +107,7 @@ export default function SpaceSettingsPage() {
             <CardTitle>Credits</CardTitle>
             <CardDescription>Controls credit allocation for members</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-3 gap-4">
+          <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="cpd">Credits Per Day</Label>
               <Input id="cpd" type="number" value={creditsPerDay} onChange={(e) => setCreditsPerDay(e.target.value)} />

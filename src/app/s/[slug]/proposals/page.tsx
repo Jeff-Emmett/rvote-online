@@ -70,9 +70,9 @@ export default async function SpaceProposalsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h2 className="text-2xl font-bold">Proposals</h2>
-        <Button asChild>
+        <Button asChild size="sm">
           <Link href="/proposals/new">
             <Plus className="h-4 w-4 mr-2" />
             New Proposal
@@ -83,13 +83,13 @@ export default async function SpaceProposalsPage({
       <Tabs defaultValue="ranking">
         <TabsList>
           <TabsTrigger value="ranking">
-            Ranking <Badge variant="secondary" className="ml-2 text-xs">{rankingProposals.length}</Badge>
+            Ranking <Badge variant="secondary" className="ml-2 text-xs hidden sm:inline">{rankingProposals.length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="voting">
-            Voting <Badge variant="secondary" className="ml-2 text-xs">{votingProposals.length}</Badge>
+            Voting <Badge variant="secondary" className="ml-2 text-xs hidden sm:inline">{votingProposals.length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="completed">
-            Completed <Badge variant="secondary" className="ml-2 text-xs">{completedProposals.length}</Badge>
+            Completed <Badge variant="secondary" className="ml-2 text-xs hidden sm:inline">{completedProposals.length}</Badge>
           </TabsTrigger>
         </TabsList>
         <TabsContent value="ranking">

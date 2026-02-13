@@ -52,14 +52,14 @@ export default async function SpaceLayout({
     >
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-3">
-          <h1 className="text-xl font-bold">{space.name}</h1>
+          <h1 className="text-lg sm:text-xl font-bold">{space.name}</h1>
           {space.description && (
             <p className="text-sm text-muted-foreground">{space.description}</p>
           )}
         </div>
       </div>
       <SpaceNav />
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-4 sm:py-6">
         {children}
       </div>
     </SpaceProvider>

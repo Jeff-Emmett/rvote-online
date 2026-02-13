@@ -36,25 +36,25 @@ export default async function SpaceDashboard({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-gradient-to-br from-orange-500/10 to-transparent border-orange-500/20">
           <CardContent className="pt-6 text-center">
-            <div className="text-3xl font-bold text-orange-600">{rankingCount}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-orange-600">{rankingCount}</div>
             <p className="text-sm text-muted-foreground">Being Ranked</p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-blue-500/10 to-transparent border-blue-500/20">
           <CardContent className="pt-6 text-center">
-            <div className="text-3xl font-bold text-blue-600">{votingCount}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-blue-600">{votingCount}</div>
             <p className="text-sm text-muted-foreground">In Voting</p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-green-500/10 to-transparent border-green-500/20">
           <CardContent className="pt-6 text-center">
-            <div className="text-3xl font-bold text-green-600">{passedCount}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-green-600">{passedCount}</div>
             <p className="text-sm text-muted-foreground">Passed</p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-purple-500/10 to-transparent border-purple-500/20">
           <CardContent className="pt-6 text-center">
-            <div className="text-3xl font-bold text-purple-600">{memberCount}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-purple-600">{memberCount}</div>
             <p className="text-sm text-muted-foreground">Members</p>
           </CardContent>
         </Card>
@@ -62,7 +62,7 @@ export default async function SpaceDashboard({
 
       {/* Top proposals */}
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
           <h2 className="text-xl font-bold">Top Proposals</h2>
           <div className="flex gap-2">
             <Button asChild variant="outline" size="sm">

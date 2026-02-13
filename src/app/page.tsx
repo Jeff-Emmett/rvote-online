@@ -24,7 +24,7 @@ export default function HomePage() {
   return (
     <div className="space-y-16">
       {/* Hero section */}
-      <section className="relative text-center py-16 space-y-6 overflow-hidden">
+      <section className="relative text-center py-8 sm:py-16 space-y-6 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 -z-10" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl -z-10" />
@@ -32,7 +32,7 @@ export default function HomePage() {
         <Badge variant="secondary" className="text-sm px-4 py-1 bg-primary/10 text-primary border-primary/20">
           Part of the rSpace Ecosystem
         </Badge>
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight max-w-4xl mx-auto leading-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight max-w-4xl mx-auto leading-tight">
           Democratic<br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Backlog Prioritization</span>
         </h1>
@@ -196,11 +196,11 @@ export default function HomePage() {
           <h3 className="text-lg font-semibold text-center mb-4">
             Vote Cost Calculator
           </h3>
-          <div className="grid grid-cols-5 gap-2 text-center">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 text-center">
             {[1, 2, 3, 4, 5].map((votes) => (
               <div
                 key={votes}
-                className="p-4 rounded-lg border-2 bg-card hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
+                className="p-3 sm:p-4 rounded-lg border-2 bg-card hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
               >
                 <div className="text-2xl font-bold text-primary">{votes}</div>
                 <div className="text-sm text-muted-foreground">

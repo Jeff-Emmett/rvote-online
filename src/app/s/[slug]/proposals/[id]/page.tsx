@@ -78,7 +78,7 @@ export default async function SpaceProposalDetailPage({
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex items-start gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start gap-4">
         {proposal.status === "RANKING" && (
           <div className="pt-1">
             <VoteButtons
@@ -92,7 +92,7 @@ export default async function SpaceProposalDetailPage({
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <Badge className={statusColors[proposal.status]}>{proposal.status}</Badge>
             {proposal.votingEndsAt && (
               <span className="text-sm text-muted-foreground">
@@ -100,7 +100,7 @@ export default async function SpaceProposalDetailPage({
               </span>
             )}
           </div>
-          <h1 className="text-2xl font-bold">{proposal.title}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">{proposal.title}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             by {proposal.author.name || proposal.author.email} &middot;{" "}
             {formatDistanceToNow(new Date(proposal.createdAt), { addSuffix: true })}

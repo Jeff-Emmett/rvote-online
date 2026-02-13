@@ -94,7 +94,7 @@ export function ProposalCard({
       isUpvoted ? "ring-1 ring-orange-500/30" : isDownvoted ? "ring-1 ring-blue-500/30" : ""
     }`}>
       {showVoting && isRanking && (
-        <div className="flex items-center justify-center py-3 px-4 bg-muted/50 border-r min-w-[80px]">
+        <div className="flex items-center justify-center py-2 px-2 sm:py-3 sm:px-4 bg-muted/50 border-r min-w-[60px] sm:min-w-[80px]">
           <VoteButtons
             proposalId={proposal.id}
             currentScore={score}
@@ -113,7 +113,7 @@ export function ProposalCard({
               href={`/proposals/${proposal.id}`}
               className="hover:underline"
             >
-              <h3 className="font-semibold text-lg leading-tight line-clamp-2">
+              <h3 className="font-semibold text-base sm:text-lg leading-tight line-clamp-2">
                 {proposal.title}
               </h3>
             </Link>
@@ -159,7 +159,7 @@ export function ProposalCard({
         </CardContent>
 
         <CardFooter className="pt-2 pb-4 text-xs text-muted-foreground">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <span className="flex items-center gap-1">
               <User className="h-3 w-3" />
               {proposal.author.name || proposal.author.email.split("@")[0]}
