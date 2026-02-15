@@ -12,18 +12,24 @@ COPY encryptid-sdk /encryptid-sdk/
 # Install dependencies
 RUN npm ci || npm install
 
-# Copy source files, then restore node_modules
-COPY rvote-online/ .
-RUN rm -rf node_modules .next
+# Ensure SDK is properly linked in node_modules
+RUN rm -rf node_modules/@encryptid/sdk && \
+    mkdir -p node_modules/@encryptid && \
+    cp -r /encryptid-sdk node_modules/@encryptid/sdk
 
-# Re-install to get clean node_modules with SDK resolved
-RUN npm ci || npm install
+# Copy source files (exclude node_modules/.next from source)
+COPY rvote-online/ /tmp/rvote-src/
+RUN cp -r /tmp/rvote-src/src ./src && \
+    cp -r /tmp/rvote-src/public ./public 2>/dev/null || true && \
+    cp /tmp/rvote-src/next.config.ts /tmp/rvote-src/tsconfig.json /tmp/rvote-src/postcss.config.mjs /tmp/rvote-src/tailwind.config.ts /tmp/rvote-src/eslint.config.mjs /tmp/rvote-src/components.json ./ 2>/dev/null || true && \
+    cp /tmp/rvote-src/middleware.ts ./ 2>/dev/null || true && \
+    rm -rf /tmp/rvote-src
 
 # Generate Prisma client
 RUN npx prisma generate
 
-# Build the application (use webpack - Turbopack has issues with file: linked subpath exports)
-RUN npx next build --no-turbopack
+# Build the application
+RUN npm run build
 
 # Production stage
 FROM node:20-alpine AS runner
