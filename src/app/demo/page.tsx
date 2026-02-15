@@ -12,10 +12,10 @@ export default function DemoPage() {
         <Badge variant="secondary" className="text-sm">
           Interactive Demo
         </Badge>
-        <h1 className="text-4xl font-bold">Try Quadratic Proposal Ranking</h1>
+        <h1 className="text-4xl font-bold">Live Community Polls</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Experience how rVote works without creating an account. Click the vote
-          arrows to rank proposals—watch how quadratic costs scale in real-time.
+          These polls are synced in real-time across the entire r* ecosystem via rSpace.
+          Vote on options and watch tallies update live for everyone.
         </p>
       </div>
 

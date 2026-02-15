@@ -124,11 +124,11 @@ export default function HomePage() {
       <section className="py-8">
         <div className="text-center mb-6">
           <Badge variant="secondary" className="mb-3">
-            Interactive Demo
+            Live Demo
           </Badge>
           <h2 className="text-2xl font-bold">Try It Yourself</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Click the vote arrows to rank proposals. Watch how quadratic costs scale in real-time.
+            Vote on live polls synced across the r* ecosystem. Changes appear in real-time for everyone.
           </p>
         </div>
         <div className="max-w-4xl mx-auto">
