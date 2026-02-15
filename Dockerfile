@@ -4,14 +4,16 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
-COPY prisma ./prisma/
+COPY rvote-online/package*.json ./
+COPY rvote-online/prisma ./prisma/
+# Copy local SDK dependency (package.json references file:../encryptid-sdk)
+COPY encryptid-sdk /encryptid-sdk/
 
 # Install dependencies
-RUN npm ci
+RUN npm ci || npm install
 
 # Copy source files
-COPY . .
+COPY rvote-online/ .
 
 # Generate Prisma client
 RUN npx prisma generate

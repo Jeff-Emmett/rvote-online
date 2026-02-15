@@ -1,6 +1,8 @@
 services:
   rvote:
-    build: .
+    build:
+      context: ..
+      dockerfile: rvote-online/Dockerfile
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
