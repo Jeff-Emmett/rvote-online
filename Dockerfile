@@ -12,14 +12,18 @@ COPY encryptid-sdk /encryptid-sdk/
 # Install dependencies
 RUN npm ci || npm install
 
-# Copy source files
+# Copy source files, then restore node_modules
 COPY rvote-online/ .
+RUN rm -rf node_modules .next
+
+# Re-install to get clean node_modules with SDK resolved
+RUN npm ci || npm install
 
 # Generate Prisma client
 RUN npx prisma generate
 
-# Build the application
-RUN npm run build
+# Build the application (use webpack - Turbopack has issues with file: linked subpath exports)
+RUN npx next build --no-turbopack
 
 # Production stage
 FROM node:20-alpine AS runner
