@@ -34,6 +34,26 @@ export default function RootLayout({
         <Providers>
           <Navbar />
           <main className="container mx-auto px-4 py-8">{children}</main>
+          <footer className="border-t border-border/50 py-8 mt-16">
+            <div className="max-w-7xl mx-auto px-6">
+              <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground mb-4">
+                <span className="font-medium text-foreground/60">r* Ecosystem</span>
+                <a href="https://rspace.online" className="hover:text-foreground transition-colors">🌌 rSpace</a>
+                <a href="https://rmaps.online" className="hover:text-foreground transition-colors">🗺️ rMaps</a>
+                <a href="https://rnotes.online" className="hover:text-foreground transition-colors">📝 rNotes</a>
+                <a href="https://rvote.online" className="hover:text-foreground transition-colors font-medium text-foreground/80">🗳️ rVote</a>
+                <a href="https://rfunds.online" className="hover:text-foreground transition-colors">💰 rFunds</a>
+                <a href="https://rtrips.online" className="hover:text-foreground transition-colors">✈️ rTrips</a>
+                <a href="https://rcart.online" className="hover:text-foreground transition-colors">🛒 rCart</a>
+                <a href="https://rwallet.online" className="hover:text-foreground transition-colors">💼 rWallet</a>
+                <a href="https://rfiles.online" className="hover:text-foreground transition-colors">📁 rFiles</a>
+                <a href="https://rnetwork.online" className="hover:text-foreground transition-colors">🌐 rNetwork</a>
+              </div>
+              <p className="text-center text-xs text-muted-foreground/60">
+                Part of the r* ecosystem — collaborative tools for communities.
+              </p>
+            </div>
+          </footer>
         </Providers>
       </body>
     </html>
