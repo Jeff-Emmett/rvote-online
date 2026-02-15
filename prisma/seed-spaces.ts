@@ -20,7 +20,7 @@ async function main() {
       name: "rVote Community",
       slug: "legacy",
       description: "The original rVote community space.",
-      isPublic: true,
+      visibility: "public_read",
       promotionThreshold: 100,
       votingPeriodDays: 7,
       creditsPerDay: 10,
