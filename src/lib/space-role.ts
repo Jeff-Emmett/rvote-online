@@ -50,8 +50,11 @@ export async function resolveUserSpaceRole(
     return result;
   }
 
-  // Check if owner
-  if (space.creatorId === userId) {
+  // Fetch user once for DID-based lookups
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+
+  // Check if owner (via DID match)
+  if (space.ownerDid && user?.did && space.ownerDid === user.did) {
     const result: ResolvedRole = { role: SpaceRole.ADMIN, source: 'owner' };
     roleCache.set(cacheKey, { role: result, expires: Date.now() + CACHE_TTL });
     return result;
@@ -74,7 +77,6 @@ export async function resolveUserSpaceRole(
 
   // Fall back to EncryptID server for cross-module membership
   try {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (user?.did) {
       const url = `${ENCRYPTID_SERVER}/api/spaces/${encodeURIComponent(spaceSlug)}/members/${encodeURIComponent(user.did)}`;
       const res = await fetch(url);
