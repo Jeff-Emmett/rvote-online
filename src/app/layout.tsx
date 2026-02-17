@@ -47,6 +47,7 @@ export default function RootLayout({
                 <a href="https://rcart.online" className="hover:text-foreground transition-colors">🛒 rCart</a>
                 <a href="https://rwallet.online" className="hover:text-foreground transition-colors">💼 rWallet</a>
                 <a href="https://rfiles.online" className="hover:text-foreground transition-colors">📁 rFiles</a>
+                <a href="https://rinbox.online" className="hover:text-foreground transition-colors">✉️ rInbox</a>
                 <a href="https://rnetwork.online" className="hover:text-foreground transition-colors">🌐 rNetwork</a>
               </div>
               <p className="text-center text-xs text-muted-foreground/60">
