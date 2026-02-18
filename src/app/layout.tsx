@@ -28,6 +28,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script defer src="https://rdata.online/collect.js" data-website-id="320c5a22-9a36-4b25-b270-3c5d4033a532" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background`}
       >
@@ -49,6 +52,8 @@ export default function RootLayout({
                 <a href="https://rfiles.online" className="hover:text-foreground transition-colors">📁 rFiles</a>
                 <a href="https://rinbox.online" className="hover:text-foreground transition-colors">✉️ rInbox</a>
                 <a href="https://rnetwork.online" className="hover:text-foreground transition-colors">🌐 rNetwork</a>
+                <a href="https://rbooks.online" className="hover:text-foreground transition-colors">📚 rBooks</a>
+                <a href="https://rdata.online" className="hover:text-foreground transition-colors">📊 rData</a>
               </div>
               <p className="text-center text-xs text-muted-foreground/60">
                 Part of the r* ecosystem — collaborative tools for communities.

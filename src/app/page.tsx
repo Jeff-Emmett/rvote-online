@@ -427,6 +427,7 @@ export default function HomePage() {
             <a href="https://rfunds.online" className="hover:text-foreground transition-colors">rFunds</a>
             <a href="https://rtrips.online" className="hover:text-foreground transition-colors">rTrips</a>
             <a href="https://rcart.online" className="hover:text-foreground transition-colors">rCart</a>
+            <a href="https://rchoices.online" className="hover:text-foreground transition-colors">rChoices</a>
             <a href="https://rwallet.online" className="hover:text-foreground transition-colors">rWallet</a>
             <a href="https://rfiles.online" className="hover:text-foreground transition-colors">rFiles</a>
             <a href="https://rtube.online" className="hover:text-foreground transition-colors">rTube</a>
