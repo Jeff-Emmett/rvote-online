@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -10,13 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Fingerprint } from "lucide-react";
 import { toast } from "sonner";
-import { EncryptIDClient } from "@encryptid/sdk/client";
-
-const ENCRYPTID_SERVER = process.env.NEXT_PUBLIC_ENCRYPTID_SERVER_URL || "https://encryptid.jeffemmett.com";
-const encryptid = new EncryptIDClient(ENCRYPTID_SERVER);
+import { useEncryptID } from "@encryptid/sdk/ui/react";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const { register } = useEncryptID();
 
   const [name, setName] = useState("");
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false);
@@ -27,23 +24,22 @@ export default function SignUpPage() {
     try {
       const username = name.trim() || `user-${Date.now().toString(36)}`;
 
-      // SDK handles the full WebAuthn registration ceremony
-      const regResult = await encryptid.register(username, name || username);
+      // SDK handles the full WebAuthn registration ceremony + stores token
+      await register(username, name || username);
 
-      // Exchange EncryptID token for NextAuth session
-      const result = await signIn("encryptid", {
-        token: regResult.token,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        toast.error("Passkey registered but session creation failed");
-        router.push("/auth/signin");
-      } else {
-        toast.success("Account created with passkey! Welcome to rVote.");
-        router.push("/");
-        router.refresh();
+      // Get the token from localStorage and set it as a cookie for SSR
+      const token = localStorage.getItem("encryptid_token");
+      if (token) {
+        await fetch("/api/auth/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        });
       }
+
+      toast.success("Account created with passkey! Welcome to rVote.");
+      router.push("/");
+      router.refresh();
     } catch (error: any) {
       if (error.name === "NotAllowedError") {
         toast.error("Passkey registration was cancelled");

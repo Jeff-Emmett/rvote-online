@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useEncryptID } from "@encryptid/sdk/ui/react";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CreditDisplay } from "./CreditDisplay";
@@ -15,12 +15,20 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function Navbar() {
-  const { data: session, status } = useSession();
+  const { isAuthenticated, username, did, loading, logout } = useEncryptID();
   const pathname = usePathname();
 
   // Hide the main navbar on space pages — SpaceNav handles navigation there
   if (pathname.startsWith("/s/")) {
     return null;
+  }
+
+  async function handleSignOut() {
+    // Clear the server-side cookie
+    await fetch("/api/auth/session", { method: "DELETE" });
+    // Clear client-side state
+    logout();
+    window.location.href = "/";
   }
 
   return (
@@ -48,9 +56,9 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-4">
-            {status === "loading" ? (
+            {loading ? (
               <div className="h-8 w-20 animate-pulse bg-muted rounded" />
-            ) : session?.user ? (
+            ) : isAuthenticated ? (
               <>
                 <CreditDisplay />
                 <DropdownMenu>
@@ -61,8 +69,8 @@ export function Navbar() {
                     >
                       <Avatar className="h-8 w-8">
                         <AvatarFallback>
-                          {session.user.name?.[0]?.toUpperCase() ||
-                            session.user.email?.[0]?.toUpperCase() ||
+                          {username?.[0]?.toUpperCase() ||
+                            did?.[0]?.toUpperCase() ||
                             "U"}
                         </AvatarFallback>
                       </Avatar>
@@ -71,12 +79,12 @@ export function Navbar() {
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <div className="flex items-center justify-start gap-2 p-2">
                       <div className="flex flex-col space-y-1 leading-none">
-                        {session.user.name && (
-                          <p className="font-medium">{session.user.name}</p>
+                        {username && (
+                          <p className="font-medium">{username}</p>
                         )}
-                        {session.user.email && (
+                        {did && (
                           <p className="w-[200px] truncate text-sm text-muted-foreground">
-                            {session.user.email}
+                            {did}
                           </p>
                         )}
                       </div>
@@ -91,7 +99,7 @@ export function Navbar() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       className="cursor-pointer"
-                      onClick={() => signOut()}
+                      onClick={handleSignOut}
                     >
                       Sign out
                     </DropdownMenuItem>

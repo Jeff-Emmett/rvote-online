@@ -1,12 +1,11 @@
 /**
  * Space Role bridge for rVote
  *
- * Bridges NextAuth session + EncryptID SDK SpaceRole system.
+ * Bridges EncryptID auth + SDK SpaceRole system.
  * Resolves the user's effective SpaceRole in the current space
  * by querying the EncryptID membership server.
  */
 
-import { auth } from './auth';
 import { prisma } from './prisma';
 import {
   SpaceRole,
@@ -14,7 +13,6 @@ import {
   type ResolvedRole,
 } from '@encryptid/sdk/types';
 import { RVOTE_PERMISSIONS } from '@encryptid/sdk/types/modules';
-import type { Session } from 'next-auth';
 
 const ENCRYPTID_SERVER = process.env.ENCRYPTID_SERVER_URL || 'https://encryptid.jeffemmett.com';
 
@@ -105,7 +103,7 @@ export async function resolveUserSpaceRole(
  * Check if the current session user has a specific rVote capability.
  */
 export async function checkVoteCapability(
-  session: Session | null,
+  session: { user: { id: string } } | null,
   spaceSlug: string,
   capability: keyof typeof RVOTE_PERMISSIONS.capabilities,
 ): Promise<boolean> {

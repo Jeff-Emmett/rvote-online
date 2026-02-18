@@ -1,22 +1,19 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Fingerprint } from "lucide-react";
 import { toast } from "sonner";
-import { EncryptIDClient } from "@encryptid/sdk/client";
-
-const ENCRYPTID_SERVER = process.env.NEXT_PUBLIC_ENCRYPTID_SERVER_URL || "https://encryptid.jeffemmett.com";
-const encryptid = new EncryptIDClient(ENCRYPTID_SERVER);
+import { useEncryptID } from "@encryptid/sdk/ui/react";
 
 function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const { login } = useEncryptID();
 
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false);
 
@@ -24,22 +21,22 @@ function SignInForm() {
     setIsPasskeyLoading(true);
 
     try {
-      // SDK handles the full WebAuthn ceremony
-      const authResult = await encryptid.authenticate();
+      // SDK handles the full WebAuthn ceremony + stores token in localStorage
+      await login();
 
-      // Exchange EncryptID token for NextAuth session
-      const result = await signIn("encryptid", {
-        token: authResult.token,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        toast.error("Passkey verified but session creation failed");
-      } else {
-        toast.success("Signed in with passkey!");
-        router.push(callbackUrl);
-        router.refresh();
+      // Get the token from localStorage and set it as a cookie for SSR
+      const token = localStorage.getItem("encryptid_token");
+      if (token) {
+        await fetch("/api/auth/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        });
       }
+
+      toast.success("Signed in with passkey!");
+      router.push(callbackUrl);
+      router.refresh();
     } catch (error: any) {
       if (error.name === "NotAllowedError") {
         toast.error("No passkey found. Create an account first.");
