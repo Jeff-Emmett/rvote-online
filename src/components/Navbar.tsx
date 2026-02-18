@@ -39,10 +39,10 @@ export function Navbar() {
                 Demo
               </Link>
               <Link
-                href="/spaces"
+                href="/spaces/new"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                Spaces
+                Create Space
               </Link>
             </div>
           </div>
