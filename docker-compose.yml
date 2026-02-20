@@ -14,9 +14,9 @@ services:
       - DATABASE_URL=postgresql://rvote:${DB_PASSWORD}@postgres:5432/rvote
       - ENCRYPTID_SERVER_URL=https://encryptid.jeffemmett.com
       - NEXT_PUBLIC_ENCRYPTID_SERVER_URL=https://encryptid.jeffemmett.com
-      - SMTP_HOST=${SMTP_HOST:-mx.jeffemmett.com}
+      - SMTP_HOST=${SMTP_HOST:-mail.rmail.online}
       - SMTP_PORT=${SMTP_PORT:-587}
-      - SMTP_USER=${SMTP_USER:-noreply@jeffemmett.com}
+      - SMTP_USER=${SMTP_USER:-noreply@rmail.online}
       - SMTP_PASS=${SMTP_PASS}
       - ROOT_DOMAIN=rvote.online
       - NEXT_PUBLIC_ROOT_DOMAIN=rvote.online
