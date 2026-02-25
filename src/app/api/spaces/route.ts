@@ -1,97 +1,45 @@
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { generateUniqueSlug } from "@/lib/spaces";
-import { NextRequest, NextResponse } from "next/server";
+/**
+ * Spaces API proxy — forwards to rSpace (the canonical spaces authority).
+ *
+ * Every r*App proxies /api/spaces to rSpace so the SpaceSwitcher dropdown
+ * shows the same spaces everywhere. The EncryptID token is forwarded so
+ * rSpace can return user-specific spaces (owned/member).
+ */
 
-// GET /api/spaces — List the user's spaces
-export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+import { NextRequest, NextResponse } from 'next/server';
+
+const RSPACE_API = process.env.RSPACE_API_URL || 'https://rspace.online';
+
+export async function GET(req: NextRequest) {
+  const headers: Record<string, string> = {};
+
+  // Forward the EncryptID token (from Authorization header or cookie)
+  const auth = req.headers.get('Authorization');
+  if (auth) {
+    headers['Authorization'] = auth;
+  } else {
+    // Fallback: check for encryptid_token cookie
+    const tokenCookie = req.cookies.get('encryptid_token');
+    if (tokenCookie) {
+      headers['Authorization'] = `Bearer ${tokenCookie.value}`;
+    }
   }
 
-  const memberships = await prisma.spaceMember.findMany({
-    where: { userId: session.user.id },
-    include: {
-      space: {
-        include: {
-          _count: { select: { members: true, proposals: true } },
-        },
-      },
-    },
-    orderBy: { joinedAt: "desc" },
-  });
-
-  const spaces = memberships.map((m) => ({
-    ...m.space,
-    role: m.role,
-    memberCount: m.space._count.members,
-    proposalCount: m.space._count.proposals,
-  }));
-
-  return NextResponse.json(spaces);
-}
-
-// POST /api/spaces — Create a new space
-export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const body = await req.json();
-  const { name, description, slug: requestedSlug, visibility = "public_read" } = body;
-
-  // Validate visibility
-  const validVisibilities = ["public", "public_read", "authenticated", "members_only"];
-  if (!validVisibilities.includes(visibility)) {
-    return NextResponse.json(
-      { error: `Invalid visibility. Must be one of: ${validVisibilities.join(", ")}` },
-      { status: 400 }
-    );
-  }
-
-  if (!name || typeof name !== "string" || name.trim().length === 0) {
-    return NextResponse.json({ error: "Name is required" }, { status: 400 });
-  }
-
-  if (name.length > 100) {
-    return NextResponse.json({ error: "Name must be 100 characters or less" }, { status: 400 });
-  }
-
-  const slug = requestedSlug
-    ? requestedSlug.toLowerCase().replace(/[^a-z0-9-]/g, "")
-    : await generateUniqueSlug(name);
-
-  // Check slug uniqueness
-  const existing = await prisma.space.findUnique({ where: { slug } });
-  if (existing) {
-    return NextResponse.json({ error: "This slug is already taken" }, { status: 409 });
-  }
-
-  // Create space + admin membership in a transaction
-  const space = await prisma.$transaction(async (tx) => {
-    const newSpace = await tx.space.create({
-      data: {
-        name: name.trim(),
-        slug,
-        description: description?.trim() || null,
-        visibility,
-        ownerDid: session.user.did || null,
-      },
+  try {
+    const res = await fetch(`${RSPACE_API}/api/spaces`, {
+      headers,
+      next: { revalidate: 30 }, // cache for 30s to avoid hammering rSpace
     });
 
-    await tx.spaceMember.create({
-      data: {
-        userId: session.user.id,
-        spaceId: newSpace.id,
-        role: "ADMIN",
-        credits: newSpace.startingCredits,
-      },
-    });
+    if (!res.ok) {
+      // If rSpace is down, return empty spaces (graceful degradation)
+      return NextResponse.json({ spaces: [] });
+    }
 
-    return newSpace;
-  });
-
-  return NextResponse.json(space, { status: 201 });
+    const data = await res.json();
+    return NextResponse.json(data);
+  } catch {
+    // rSpace unreachable — return empty list
+    return NextResponse.json({ spaces: [] });
+  }
 }

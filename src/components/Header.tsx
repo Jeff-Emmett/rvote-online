@@ -22,7 +22,7 @@ interface HeaderProps {
 
 export function Header({ current = 'notes', breadcrumbs, actions, maxWidth = 'max-w-6xl' }: HeaderProps) {
   return (
-    <nav className="border-b border-slate-800 backdrop-blur-sm bg-[#0a0a0a]/90 sticky top-0 z-50">
+    <nav className="border-b border-slate-800 backdrop-blur-sm bg-slate-900/85 sticky top-0 z-50">
       <div className={`${maxWidth} mx-auto px-4 md:px-6 py-3 flex items-center justify-between gap-2`}>
         {/* Left: App switcher + Space switcher + Breadcrumbs */}
         <div className="flex items-center gap-1 min-w-0">
