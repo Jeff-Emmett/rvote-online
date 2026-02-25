@@ -70,9 +70,9 @@ export async function POST(request: Request) {
 
   await prisma.vote.createMany({
     data: [
-      { proposalId: prop1.id, userId: alice.id, weight: 8, creditCost: 64 },
-      { proposalId: prop1.id, userId: bob.id, weight: 5, creditCost: 25 },
-      { proposalId: prop1.id, userId: charlie.id, weight: 2, creditCost: 4 },
+      { proposalId: prop1.id, userId: alice.id, weight: 8, creditCost: 64, decaysAt: new Date(Date.now() + 30 * 86400000) },
+      { proposalId: prop1.id, userId: bob.id, weight: 5, creditCost: 25, decaysAt: new Date(Date.now() + 30 * 86400000) },
+      { proposalId: prop1.id, userId: charlie.id, weight: 2, creditCost: 4, decaysAt: new Date(Date.now() + 30 * 86400000) },
     ],
   });
 
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
 
   await prisma.vote.createMany({
     data: [
-      { proposalId: prop2.id, userId: bob.id, weight: 3, creditCost: 9 },
+      { proposalId: prop2.id, userId: bob.id, weight: 3, creditCost: 9, decaysAt: new Date(Date.now() + 30 * 86400000) },
     ],
   });
 
@@ -111,9 +111,9 @@ export async function POST(request: Request) {
 
   await prisma.vote.createMany({
     data: [
-      { proposalId: prop3.id, userId: alice.id, weight: 10, creditCost: 100 },
-      { proposalId: prop3.id, userId: bob.id, weight: 7, creditCost: 49 },
-      { proposalId: prop3.id, userId: charlie.id, weight: 5, creditCost: 25 },
+      { proposalId: prop3.id, userId: alice.id, weight: 10, creditCost: 100, decaysAt: new Date(Date.now() - 3 * 86400000) },
+      { proposalId: prop3.id, userId: bob.id, weight: 7, creditCost: 49, decaysAt: new Date(Date.now() - 3 * 86400000) },
+      { proposalId: prop3.id, userId: charlie.id, weight: 5, creditCost: 25, decaysAt: new Date(Date.now() - 3 * 86400000) },
     ],
   });
 
