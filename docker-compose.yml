@@ -12,8 +12,8 @@ services:
       - "traefik.docker.network=traefik-public"
     environment:
       - DATABASE_URL=postgresql://rvote:${DB_PASSWORD}@postgres:5432/rvote
-      - ENCRYPTID_SERVER_URL=https://encryptid.jeffemmett.com
-      - NEXT_PUBLIC_ENCRYPTID_SERVER_URL=https://encryptid.jeffemmett.com
+      - ENCRYPTID_SERVER_URL=https://auth.ridentity.online
+      - NEXT_PUBLIC_ENCRYPTID_SERVER_URL=https://auth.ridentity.online
       - SMTP_HOST=${SMTP_HOST:-mail.rmail.online}
       - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_USER=${SMTP_USER:-noreply@rmail.online}

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
 const SERVER_URL =
-  process.env.ENCRYPTID_SERVER_URL || 'https://encryptid.jeffemmett.com';
+  process.env.ENCRYPTID_SERVER_URL || 'https://auth.ridentity.online';
 
 /**
  * POST /api/auth/session — Verify EncryptID token and set session cookie.

@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { prisma } from './prisma';
 
 const SERVER_URL =
-  process.env.ENCRYPTID_SERVER_URL || 'https://encryptid.jeffemmett.com';
+  process.env.ENCRYPTID_SERVER_URL || 'https://auth.ridentity.online';
 
 interface AuthSession {
   user: {
