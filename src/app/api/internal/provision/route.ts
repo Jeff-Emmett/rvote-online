@@ -28,15 +28,12 @@ export async function POST(request: Request) {
     create: { email: systemEmail, name: `${space}-admin`, did: systemDid },
   });
 
-  const visibility = body.public ? "public" : "public_read";
-
   const created = await prisma.space.create({
     data: {
       name: space.charAt(0).toUpperCase() + space.slice(1),
       slug: space,
       description: body.description || `${space} governance space`,
-      visibility,
-      ownerDid: systemDid,
+      isPublic: body.public ?? false,
       members: {
         create: {
           userId: user.id,
