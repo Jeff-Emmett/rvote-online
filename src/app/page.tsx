@@ -2,6 +2,7 @@ import { InteractiveDemo } from "@/components/InteractiveDemo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { EcosystemFooter } from "@/components/EcosystemFooter";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -416,33 +417,7 @@ export default function HomePage() {
       </section>
 
       {/* Ecosystem Footer */}
-      <footer className="border-t border-border py-8">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground mb-4">
-            <span className="font-medium">r* Ecosystem</span>
-            <a href="https://rspace.online" className="hover:text-foreground transition-colors">rSpace</a>
-            <a href="https://rmaps.online" className="hover:text-foreground transition-colors">rMaps</a>
-            <a href="https://rnotes.online" className="hover:text-foreground transition-colors">rNotes</a>
-            <a href="https://rvote.online" className="hover:text-foreground transition-colors font-medium text-foreground">rVote</a>
-            <a href="https://rfunds.online" className="hover:text-foreground transition-colors">rFunds</a>
-            <a href="https://rtrips.online" className="hover:text-foreground transition-colors">rTrips</a>
-            <a href="https://rcart.online" className="hover:text-foreground transition-colors">rCart</a>
-            <a href="https://rchoices.online" className="hover:text-foreground transition-colors">rChoices</a>
-            <a href="https://rwallet.online" className="hover:text-foreground transition-colors">rWallet</a>
-            <a href="https://rfiles.online" className="hover:text-foreground transition-colors">rFiles</a>
-            <a href="https://rtube.online" className="hover:text-foreground transition-colors">rTube</a>
-            <a href="https://rcal.online" className="hover:text-foreground transition-colors">rCal</a>
-            <a href="https://rnetwork.online" className="hover:text-foreground transition-colors">rNetwork</a>
-            <a href="https://rinbox.online" className="hover:text-foreground transition-colors">rInbox</a>
-            <a href="https://rstack.online" className="hover:text-foreground transition-colors">rStack</a>
-            <a href="https://rauctions.online" className="hover:text-foreground transition-colors">rAuctions</a>
-            <a href="https://rpubs.online" className="hover:text-foreground transition-colors">rPubs</a>
-          </div>
-          <p className="text-center text-xs text-muted-foreground/60">
-            Part of the r* ecosystem — collaborative tools for communities.
-          </p>
-        </div>
-      </footer>
+      <EcosystemFooter current="rVote" />
     </div>
   );
 }
