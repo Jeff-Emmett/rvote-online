@@ -33,7 +33,6 @@ export async function POST(request: Request) {
       name: space.charAt(0).toUpperCase() + space.slice(1),
       slug: space,
       description: body.description || `${space} governance space`,
-      isPublic: body.public ?? false,
       members: {
         create: {
           userId: user.id,
