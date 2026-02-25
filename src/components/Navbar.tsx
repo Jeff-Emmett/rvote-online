@@ -5,6 +5,7 @@ import { useEncryptID } from "@encryptid/sdk/ui/react";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CreditDisplay } from "./CreditDisplay";
+import { AppSwitcher } from "./AppSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +37,7 @@ export function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
+            <AppSwitcher current="vote" />
             <Link href="/" className="flex items-center gap-2">
               <span className="text-2xl font-bold text-primary">rVote</span>
             </Link>
