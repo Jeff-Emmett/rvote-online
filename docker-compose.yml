@@ -8,6 +8,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.rvote.rule=Host(`rvote.online`) || Host(`www.rvote.online`) || HostRegexp(`{subdomain:[a-z0-9-]+}.rvote.online`)"
       - "traefik.http.routers.rvote.entrypoints=web"
+      - "traefik.http.routers.rvote.priority=130"
       - "traefik.http.services.rvote.loadbalancer.server.port=3000"
       - "traefik.docker.network=traefik-public"
     environment:
