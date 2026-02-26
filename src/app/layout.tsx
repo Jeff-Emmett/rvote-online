@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "rVote - Quadratic Proposal Ranking for Community Governance",
+  title: "(you)rVote — Quadratic Proposal Ranking for Community Governance",
   description:
     "A democratic backlog prioritization platform with quadratic proposal ranking. Proposals are ranked by members, and top proposals advance to pass/fail voting.",
   keywords: ["ranking", "governance", "quadratic proposal ranking", "proposals", "community", "backlog prioritization"],
