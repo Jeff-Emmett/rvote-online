@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Header } from "@/components/Header";
+import InfoPopup from "@/components/InfoPopup";
+import { LANDING_HTML } from "@/components/landing-content";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +43,7 @@ export default function RootLayout({
           <Header current="vote" />
           <main className="container mx-auto px-4 py-8">{children}</main>
         </Providers>
+        <InfoPopup appName="rVote" appIcon="🗳️" landingHtml={LANDING_HTML} />
       </body>
     </html>
   );
