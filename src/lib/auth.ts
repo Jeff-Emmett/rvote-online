@@ -1,6 +1,7 @@
 import { verifyEncryptIDToken } from '@encryptid/sdk/server';
 import { cookies } from 'next/headers';
 import { prisma } from './prisma';
+import { registerCanonicalIdentity } from './holon';
 
 const SERVER_URL =
   process.env.ENCRYPTID_SERVER_URL || 'https://auth.ridentity.online';
@@ -42,6 +43,10 @@ export async function auth(): Promise<AuthSession | null> {
         emailVerified: new Date(),
       },
     });
+
+    // Additive: fold this EncryptID DID into the canonical Identity holon.
+    // Fire-and-forget; never blocks or fails the auth path.
+    registerCanonicalIdentity(user.did, user.name);
 
     return {
       user: {
