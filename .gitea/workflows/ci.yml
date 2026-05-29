@@ -35,7 +35,10 @@ jobs:
             git reset --hard origin/${{ github.ref_name }}
             [ -d /opt/websites/encryptid-sdk ] || cp -r /opt/apps/encryptid-sdk /opt/websites/encryptid-sdk
             docker compose build rvote
-            docker compose up -d rvote
+            docker compose up -d rvote || {
+              docker ps -aq --filter "name=rvote-online-rvote" | xargs -r docker rm -f
+              docker compose up -d rvote
+            }
           '
 
       - name: Smoke test
