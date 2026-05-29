@@ -1,16 +1,17 @@
-# Gitea Actions CI/CD — Static Site (no tests, build + deploy only)
-# Copy to: <repo>/.gitea/workflows/ci.yml
-# Replace: rvote-online, /opt/websites/rvote-online, https://rvote.online/
-
+# Gitea Actions CI/CD — server-side build + deploy.
+#
+# Why server-side build: the Dockerfile uses a PARENT build context (it COPYs
+# `rvote-online/...` and the sibling `encryptid-sdk/`), so the old `docker build .`
+# in the repo root never matched the Dockerfile and the registry image was never
+# consistent. Building on the deploy host (where both siblings live under
+# /opt/websites) is the path that actually works, and matches the manual deploy.
+#
+# Deploys from the branch that was pushed (dev is the live branch for rvote).
 name: CI/CD
 
 on:
   push:
-    branches: [main]
-
-env:
-  REGISTRY: localhost:3000
-  IMAGE: localhost:3000/jeffemmett/rvote-online
+    branches: [dev]   # rvote deploys from dev
 
 jobs:
   deploy:
@@ -18,51 +19,31 @@ jobs:
     container:
       image: docker:cli
     steps:
-      - name: Setup tools
-        run: apk add --no-cache git openssh-client curl
+      - name: Setup
+        run: apk add --no-cache openssh-client
 
-      - name: Checkout
-        run: git clone --depth 1 --branch ${{ github.ref_name }} http://token:${{ github.token }}@server:3000/${{ github.repository }}.git .
-
-      - name: Set image tag
-        run: |
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-8)
-          echo "IMAGE_TAG=${SHORT_SHA}" >> $GITHUB_ENV
-
-      - name: Build and push image
-        run: |
-          docker build -t ${{ env.IMAGE }}:${{ env.IMAGE_TAG }} -t ${{ env.IMAGE }}:latest .
-          echo "${{ secrets.REGISTRY_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ secrets.REGISTRY_USER }} --password-stdin
-          docker push ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
-          docker push ${{ env.IMAGE }}:latest
-
-      - name: Deploy
+      - name: Deploy (server-side build, build-first)
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.DEPLOY_SSH_KEY }}" | base64 -d > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key root@${{ secrets.DEPLOY_HOST }} "
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key root@${{ secrets.DEPLOY_HOST }} '
+            set -e
             cd /opt/websites/rvote-online
-            cat .last-deployed-tag 2>/dev/null > .rollback-tag || true
-            echo '${{ env.IMAGE_TAG }}' > .last-deployed-tag
-            docker pull ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
-            IMAGE_TAG=${{ env.IMAGE_TAG }} docker compose up -d --no-build
-          "
+            git fetch origin -q
+            git checkout ${{ github.ref_name }} -q
+            git reset --hard origin/${{ github.ref_name }}
+            [ -d /opt/websites/encryptid-sdk ] || cp -r /opt/apps/encryptid-sdk /opt/websites/encryptid-sdk
+            docker compose build rvote
+            docker compose up -d rvote || {
+              docker ps -aq --filter "name=rvote-online-rvote" | xargs -r docker rm -f
+              docker compose up -d rvote
+            }
+          '
 
       - name: Smoke test
         run: |
-          sleep 15
-          STATUS=$(ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key root@${{ secrets.DEPLOY_HOST }} \
-            "cd /opt/websites/rvote-online && docker compose ps --format '{{{{.Status}}}}' 2>/dev/null | head -1 || echo 'unknown'")
-          if echo "$STATUS" | grep -qi "up"; then
-            echo "Smoke test passed (container status: $STATUS)"
-          else
-            echo "Smoke test failed (container status: $STATUS) — rolling back"
-            ROLLBACK_TAG=$(ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key root@${{ secrets.DEPLOY_HOST }} "cat /opt/websites/rvote-online/.rollback-tag 2>/dev/null")
-            if [ -n "$ROLLBACK_TAG" ]; then
-              ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key root@${{ secrets.DEPLOY_HOST }} \
-                "cd /opt/websites/rvote-online && IMAGE_TAG=$ROLLBACK_TAG docker compose up -d --no-build"
-              echo "Rolled back to $ROLLBACK_TAG"
-            fi
-            exit 1
-          fi
+          sleep 12
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key root@${{ secrets.DEPLOY_HOST }} \
+            "docker exec rvote-online-rvote-1 node -e 'fetch(\"http://127.0.0.1:3000/\").then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))'" \
+          && echo "smoke ok" || (echo "smoke FAILED" && exit 1)
