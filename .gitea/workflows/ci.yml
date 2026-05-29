@@ -11,7 +11,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [dev]   # rvote deploys from dev
+    branches: [main]   # rvote deploys from main
 
 jobs:
   deploy:
