@@ -21,12 +21,10 @@ services:
       - SMTP_PASS=${SMTP_PASS}
       - ROOT_DOMAIN=rvote.online
       - NEXT_PUBLIC_ROOT_DOMAIN=rvote.online
-      # canonical Identity holon shim (holon-service); auto-mints scoped tokens.
-      # Inert if HOLON_MINT_API_TOKEN unset.
+      # canonical Identity holon shim (shared holonTokens.ts); inert if mint unset
       - HOLON_SERVICE_URL=http://holon-service:8000
-      - HOLON_MINT_URL=http://rspace_registry:8000
-      - HOLON_SPACE=demo
-      - HOLON_APP=rvote
+      - RSPACE_REGISTRY_URL=http://rspace_registry:8000
+      - HOLON_APP_NAME=rvote
       - HOLON_MINT_API_TOKEN=${HOLON_MINT_API_TOKEN}
     networks:
       - traefik-public

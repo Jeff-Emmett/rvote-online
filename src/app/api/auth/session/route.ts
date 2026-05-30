@@ -1,6 +1,6 @@
 import { verifyEncryptIDToken } from '@encryptid/sdk/server';
 import { prisma } from '@/lib/prisma';
-import { registerCanonicalIdentity } from '@/lib/holon';
+import { registerIdentityOnLogin } from '@/lib/holonTokens';
 import { NextRequest, NextResponse } from 'next/server';
 
 const SERVER_URL =
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     // Additive: fold this EncryptID DID into the canonical Identity holon
     // (fire-and-forget; never blocks login).
-    registerCanonicalIdentity(user.did, user.name);
+    void registerIdentityOnLogin(user.did, user.name);
 
     const response = NextResponse.json({
       user: {
